@@ -23,23 +23,22 @@ export default function LandingPage() {
       <section className="mx-auto max-w-md px-5 pt-16 pb-20">
         <div className="mb-6 inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
           <span className="text-[11px] uppercase tracking-[0.22em] text-zinc-400">
-            First date. One outfit. Done.
+            Upload one item. Match the rest.
           </span>
         </div>
 
         <h1 className="text-[3rem] font-bold leading-[1.02] tracking-tight mb-6">
           Stop guessing
           <br />
-          <span className="text-zinc-400">what to wear.</span>
+          <span className="text-zinc-400">what goes with it.</span>
         </h1>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-xs">
-          Outfitted gives you one curated outfit for your first date — matched to your budget, your vibe, and where you are.
+          Outfitted helps you upload one clothing item and find matching pieces online — based on your budget and location.
         </p>
 
-        {/* NEW ONE-LINER */}
         <p className="text-sm text-zinc-500 mb-10 max-w-xs">
-          Built for guys who don’t want to overthink what to wear.
+          Built for guys who want better outfits without overthinking every piece.
         </p>
 
         <div className="flex flex-col gap-3 mb-12">
@@ -47,7 +46,7 @@ export default function LandingPage() {
             href="/outfit"
             className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-widest text-black transition hover:scale-[1.02] hover:bg-zinc-100 active:scale-[0.99]"
           >
-            Get my outfit
+            Upload my item
           </Link>
 
           <a
@@ -59,7 +58,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {["Takes 30 seconds", "No overthinking", "Looks intentional", "Real brands"].map((pill) => (
+          {["Upload a photo", "No overthinking", "Looks intentional", "Real brands"].map((pill) => (
             <span
               key={pill}
               className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-zinc-400"
@@ -82,9 +81,9 @@ export default function LandingPage() {
             How it works
           </p>
           <h2 className="text-3xl font-bold tracking-tight leading-tight">
-            Four questions.
+            Three steps.
             <br />
-            <span className="text-zinc-400">One outfit.</span>
+            <span className="text-zinc-400">One better outfit.</span>
           </h2>
         </div>
 
@@ -92,23 +91,23 @@ export default function LandingPage() {
           {[
             {
               step: "01",
-              title: "Pick the date type",
-              desc: "Coffee, dinner, or drinks. Each one needs a different approach.",
-            },
-            {
-              step: "02",
               title: "Set your budget",
               desc: "Affordable, mid-range, or premium. You decide the level.",
             },
             {
+              step: "02",
+              title: "Upload your item",
+              desc: "Add a clear photo of one piece you already own.",
+            },
+            {
               step: "03",
               title: "Choose your country",
-              desc: "So the links go somewhere useful and delivery is realistic.",
+              desc: "So links, prices, and stores stay relevant.",
             },
             {
               step: "04",
-              title: "Get one clean outfit",
-              desc: "A curated look with real items, prices, and direct links. No noise.",
+              title: "Get matching pieces",
+              desc: "A clean set of online items that work around your uploaded piece.",
             },
           ].map((item) => (
             <div
@@ -135,23 +134,22 @@ export default function LandingPage() {
       {/* Final CTA */}
       <section className="mx-auto max-w-md px-5 py-24 text-center">
         <h2 className="text-[2.6rem] font-bold leading-[1.02] tracking-tight mb-5">
-          One outfit.
+          One item.
           <br />
-          <span className="text-zinc-400">Zero stress.</span>
+          <span className="text-zinc-400">Full outfit.</span>
         </h2>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-10 max-w-xs mx-auto">
-          Takes less than a minute. Works for any budget. Looks like you planned it for weeks.
+          Upload a clothing photo, pick your budget, and get pieces that make it work.
         </p>
 
         <Link
           href="/outfit"
           className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-widest text-black transition hover:scale-[1.02] hover:bg-zinc-100 active:scale-[0.99]"
         >
-          Get my outfit
+          Upload my item
         </Link>
 
-        {/* NEW TINY FOOTER LINE */}
         <p className="mt-6 text-xs text-zinc-600 tracking-wide">
           Free · No signup
         </p>
@@ -163,7 +161,7 @@ export default function LandingPage() {
           Outfitted
         </span>
         <span className="text-xs text-zinc-700">
-          Men's first date style, simplified.
+          Upload one item. Match the rest.
         </span>
       </footer>
 
