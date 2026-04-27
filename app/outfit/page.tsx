@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 type Budget = "affordable" | "mid" | "premium";
-type Country = "UK" | "Germany" | "France";
 
 interface OutfitItem {
   label: string;
@@ -147,6 +146,159 @@ const OUTFITS: OutfitMap = {
   },
 };
 
+const PRODUCT_MAP: Record<string, OutfitItem[]> = {
+  "white t-shirt": [
+    {
+      label: "White Supima cotton crew-neck T-shirt",
+      brand: "Uniqlo",
+      url: "https://www.uniqlo.com/uk/en/products/E455365-000/00?colorDisplayCode=00&sizeDisplayCode=003",
+      price: "€20",
+      image: PLACEHOLDER_IMAGE,
+      note: "Clean neutral base",
+    },
+  ],
+  "black t-shirt": [
+    {
+      label: "Black regular fit T-shirt",
+      brand: "H&M",
+      url: "https://www2.hm.com/en_gb/men/shop-by-product/t-shirts-and-tanks.html",
+      price: "€15",
+      image: PLACEHOLDER_IMAGE,
+      note: "Easy dark layer",
+    },
+  ],
+  "oxford shirt": [
+    {
+      label: "White regular fit Oxford shirt",
+      brand: "H&M",
+      url: "https://www2.hm.com/en_gb/productpage.1013956002.html",
+      price: "€25",
+      image: PLACEHOLDER_IMAGE,
+      note: "Sharpens the outfit",
+    },
+  ],
+  overshirt: [
+    {
+      label: "Relaxed fit overshirt",
+      brand: "COS",
+      url: "https://www.cos.com/en-gb/men/shirts/overshirts.html",
+      price: "€75",
+      image: PLACEHOLDER_IMAGE,
+      note: "Adds structure",
+    },
+  ],
+  hoodie: [
+    {
+      label: "Relaxed fit hoodie",
+      brand: "H&M",
+      url: "https://www2.hm.com/en_gb/men/shop-by-product/hoodies-sweatshirts.html",
+      price: "€30",
+      image: PLACEHOLDER_IMAGE,
+      note: "Casual layer",
+    },
+  ],
+  chinos: [
+    {
+      label: "Slim fit cotton chinos",
+      brand: "H&M",
+      url: "https://www2.hm.com/en_gb/men/shop-by-product/trousers/chinos.html",
+      price: "€30",
+      image: PLACEHOLDER_IMAGE,
+      note: "Clean everyday base",
+    },
+  ],
+  "black jeans": [
+    {
+      label: "501 Original Fit black jeans",
+      brand: "Levi's",
+      url: "https://www.levi.com/GB/en_GB/clothing/men/jeans/straight/501-original-fit-mens-jeans/p/005010165",
+      price: "€35+",
+      image: PLACEHOLDER_IMAGE,
+      note: "Reliable dark base",
+    },
+  ],
+  "blue jeans": [
+    {
+      label: "Regular fit blue jeans",
+      brand: "H&M",
+      url: "https://www2.hm.com/en_gb/men/shop-by-product/jeans.html",
+      price: "€30",
+      image: PLACEHOLDER_IMAGE,
+      note: "Classic casual base",
+    },
+  ],
+  "tailored trousers": [
+    {
+      label: "Slim tapered trousers",
+      brand: "Reiss",
+      url: "https://www.reiss.com/men/trousers",
+      price: "€80",
+      image: PLACEHOLDER_IMAGE,
+      note: "Smarter silhouette",
+    },
+  ],
+  "white sneakers": [
+    {
+      label: "Leather trainers in white",
+      brand: "ARKET",
+      url: "https://www.arket.com/en-eu/product/leather-trainers-white-1277664001/",
+      price: "€60",
+      image: PLACEHOLDER_IMAGE,
+      note: "Clean finish",
+    },
+  ],
+  "black sneakers": [
+    {
+      label: "Black low-profile trainers",
+      brand: "ASOS DESIGN",
+      url: "https://www.asos.com/men/shoes-boots-trainers/trainers/cat/?cid=5775",
+      price: "€25+",
+      image: PLACEHOLDER_IMAGE,
+      note: "Simple dark finish",
+    },
+  ],
+  loafers: [
+    {
+      label: "Leather loafers",
+      brand: "Massimo Dutti",
+      url: "https://www.massimodutti.com/gb/men/shoes/loafers-n1477",
+      price: "€85",
+      image: PLACEHOLDER_IMAGE,
+      note: "Dressy but relaxed",
+    },
+  ],
+  "chelsea boots": [
+    {
+      label: "Black Chelsea boots",
+      brand: "Ted Baker",
+      url: "https://www.tedbaker.com/uk/mens/shoes-and-boots/chelsea-boots",
+      price: "€140",
+      image: PLACEHOLDER_IMAGE,
+      note: "Strong silhouette",
+    },
+  ],
+  blazer: [
+    {
+      label: "Unstructured wool blazer",
+      brand: "ARKET",
+      url: "https://www.arket.com/en-gb/men/blazers.html",
+      price: "€110",
+      image: PLACEHOLDER_IMAGE,
+      note: "Instant polish",
+    },
+  ],
+  "minimal accessory": [
+    {
+      label: "Slim leather card wallet",
+      brand: "Bellroy",
+      url: "https://bellroy.com/products/card-sleeve-wallet/leather/charcoal",
+      price: "€35",
+      image: PLACEHOLDER_IMAGE,
+      note: "Small polish detail",
+    },
+  ],
+};
+
 const BUDGET_OPTIONS: {
   value: Budget;
   label: string;
@@ -177,18 +329,14 @@ const BUDGET_OPTIONS: {
   },
 ];
 
-const COUNTRY_OPTIONS: Country[] = ["UK", "Germany", "France"];
-
 const BUDGET_LABELS: Record<Budget, string> = {
   affordable: "Affordable",
   mid: "Mid-Range",
   premium: "Premium",
 };
 
-function buildUploadExplanation(budget: Budget) {
-  return `Your uploaded item becomes the anchor. These pieces are matched around it on a ${BUDGET_LABELS[
-    budget
-  ].toLowerCase()} budget.`;
+function buildResultNote(budget: Budget) {
+  return `Built around your upload with a ${BUDGET_LABELS[budget].toLowerCase()} budget.`;
 }
 
 function MiniPill({ children }: { children: React.ReactNode }) {
@@ -211,15 +359,15 @@ function BackButton({ onClick }: { onClick: () => void }) {
 }
 
 function ProgressBar({ step }: { step: number }) {
+  const percent = Math.round((step / 3) * 100);
+
   return (
     <div className="mb-7">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
           Step {step} of 3
         </p>
-        <p className="text-[11px] text-zinc-600">
-          {Math.round(((step - 1) / 3) * 100)}%
-        </p>
+        <p className="text-[11px] text-zinc-600">{percent}%</p>
       </div>
 
       <div className="flex items-center gap-1.5">
@@ -227,7 +375,7 @@ function ProgressBar({ step }: { step: number }) {
           <div
             key={s}
             className={`h-[3px] flex-1 rounded-full transition-all duration-500 ${
-              s < step ? "bg-white" : s === step ? "bg-zinc-500" : "bg-white/10"
+              s <= step ? "bg-white" : "bg-white/10"
             }`}
           />
         ))}
@@ -258,13 +406,29 @@ function ProductImage({
 }
 
 export default function Home() {
-  const [budget, setBudget] = useState<Budget | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [country, setCountry] = useState<Country | null>(null);
+  const [uploadConfirmed, setUploadConfirmed] = useState(false);
+  const [budget, setBudget] = useState<Budget | null>(null);
 
-  const outfit = budget ? OUTFITS[budget] : null;
-  const showResult = Boolean(budget && uploadedImage && country && outfit);
+  const aiRecommendedItems = aiAnalysis?.recommendedPieces || [];
+
+  const dynamicItems = aiRecommendedItems
+    .map((piece: string) => {
+      const items = PRODUCT_MAP[piece.toLowerCase()] || [];
+      return items[Math.floor(Math.random() * items.length)];
+    })
+    .filter(Boolean);
+  const heroItem = dynamicItems[0];
+
+  const outfit =
+    budget && dynamicItems.length > 0
+      ? { ...OUTFITS[budget], items: dynamicItems }
+      : budget
+        ? OUTFITS[budget]
+        : null;
+  const showResult = Boolean(uploadConfirmed && budget && uploadedImage && outfit);
 
   useEffect(() => {
     return () => {
@@ -272,38 +436,68 @@ export default function Home() {
     };
   }, [uploadedImage]);
 
-  function handleUpload(file: File | undefined) {
+  async function handleUpload(file: File | undefined) {
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
-      return;
-    }
+    const preview = URL.createObjectURL(file);
+    setUploadedImage(preview);
 
-    const previewUrl = URL.createObjectURL(file);
-    setUploadedImage(previewUrl);
-    setUploadedFileName(file.name);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch("/api/analyze-item", {
+        method: "POST",
+        body: formData,
+      });
+
+      const text = await res.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Server returned non-JSON:", text);
+        throw new Error("Server returned an invalid response.");
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to analyze image.");
+      }
+
+      console.log("AI RESULT:", data);
+      setAiAnalysis(data.analysis);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function resetAll() {
-    setBudget(null);
+    if (uploadedImage) URL.revokeObjectURL(uploadedImage);
     setUploadedImage(null);
     setUploadedFileName(null);
-    setCountry(null);
+    setUploadConfirmed(false);
+    setBudget(null);
   }
 
-  const stepNumber = !budget ? 1 : !uploadedImage ? 2 : !country ? 3 : 4;
+  const stepNumber = !uploadedImage
+    ? 1
+    : !uploadConfirmed
+      ? 1
+      : !budget
+        ? 2
+        : 3;
 
   const selectedSummary = useMemo(
     () => ({
-      budget: budget ? BUDGET_LABELS[budget] : null,
       upload: uploadedImage ? "Item uploaded" : null,
-      country,
+      budget: budget ? BUDGET_LABELS[budget] : null,
     }),
-    [budget, uploadedImage, country]
+    [budget, uploadedImage]
   );
 
-  const uploadExplanation = budget ? buildUploadExplanation(budget) : null;
+  const resultNote = budget ? buildResultNote(budget) : null;
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(to_bottom,#0a0a0c,#111113_40%,#0a0a0c)] text-white">
@@ -333,24 +527,119 @@ export default function Home() {
           </div>
         </div>
 
-        {stepNumber < 4 && <ProgressBar step={stepNumber} />}
+        <ProgressBar step={stepNumber} />
 
-        {(selectedSummary.budget || selectedSummary.upload || selectedSummary.country) &&
-          stepNumber < 4 && (
+        {(selectedSummary.budget || selectedSummary.upload) &&
+          !showResult && (
             <div className="mb-5 flex flex-wrap gap-2">
-              {selectedSummary.budget && <MiniPill>{selectedSummary.budget}</MiniPill>}
               {selectedSummary.upload && <MiniPill>{selectedSummary.upload}</MiniPill>}
-              {selectedSummary.country && <MiniPill>{selectedSummary.country}</MiniPill>}
+              {selectedSummary.budget && <MiniPill>{selectedSummary.budget}</MiniPill>}
             </div>
           )}
 
-        {!budget && (
+        {!uploadedImage && (
           <section className="space-y-3">
             <div className="mb-5">
-              <h2 className="text-2xl font-semibold tracking-tight">Budget?</h2>
-              <p className="mt-1.5 text-sm text-zinc-500">
-                Sets the level of the whole outfit.
-              </p>
+              <h2 className="text-2xl font-semibold tracking-tight">Upload your item.</h2>
+              <p className="mt-1.5 text-sm text-zinc-500">Step 1 of 3</p>
+            </div>
+
+            <label className="group block cursor-pointer overflow-hidden rounded-[26px] border border-dashed border-white/[0.14] bg-white/[0.03] p-5 transition duration-200 hover:scale-[1.015] hover:border-white/25 hover:bg-white/[0.06]">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(event) => handleUpload(event.target.files?.[0])}
+              />
+
+              <div className="flex min-h-64 flex-col items-center justify-center rounded-[22px] border border-white/[0.06] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent px-5 py-8 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.05] text-2xl shadow-lg shadow-black/20">
+                  +
+                </div>
+
+                <p className="text-lg font-semibold text-white">Choose clothing photo</p>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-500">Clear image works best.</p>
+
+                <div className="mt-5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400 transition group-hover:border-white/20 group-hover:text-white">
+                  Upload image
+                </div>
+              </div>
+            </label>
+          </section>
+        )}
+
+        {uploadedImage && !uploadConfirmed && (
+          <section className="space-y-3">
+            <div className="mb-5">
+              <h2 className="text-2xl font-semibold tracking-tight">Confirm upload.</h2>
+              <p className="mt-1.5 text-sm text-zinc-500">Step 1 of 3</p>
+            </div>
+
+            <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
+              <div className="relative h-60 bg-zinc-950">
+                <img
+                  src={uploadedImage}
+                  alt="Uploaded clothing item"
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/10" />
+              </div>
+
+              {aiAnalysis && (
+                <div className="mt-4 rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
+                    AI read
+                  </p>
+
+                  <p className="mt-2 text-base font-semibold text-white">
+                    {aiAnalysis.mainColor} {aiAnalysis.itemType}
+                  </p>
+
+                  <p className="mt-1 text-sm text-zinc-500">{aiAnalysis.style}</p>
+
+                  <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                    {aiAnalysis.reason}
+                  </p>
+                </div>
+              )}
+
+              <div className="px-4 py-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">Uploaded item</p>
+                <p className="mt-1 max-w-[260px] truncate text-sm font-semibold text-zinc-100">
+                  {uploadedFileName ?? "Clothing photo"}
+                </p>
+
+                <div className="mt-4 grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => setUploadConfirmed(true)}
+                    className="rounded-full border border-white/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-100"
+                  >
+                    Looks good → continue
+                  </button>
+
+                  <label className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300 transition hover:border-white/20 hover:text-white">
+                    Change photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => handleUpload(event.target.files?.[0])}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {uploadConfirmed && !budget && (
+          <section className="space-y-3">
+            <div className="mb-5 flex items-start gap-4">
+              <BackButton onClick={() => setUploadConfirmed(false)} />
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Pick budget.</h2>
+                <p className="mt-0.5 text-sm text-zinc-500">Step 2 of 3</p>
+              </div>
             </div>
 
             {BUDGET_OPTIONS.map((opt) => (
@@ -379,114 +668,10 @@ export default function Home() {
           </section>
         )}
 
-        {budget && !uploadedImage && (
-          <section className="space-y-3">
-            <div className="mb-5 flex items-start gap-4">
-              <BackButton onClick={() => setBudget(null)} />
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Upload your item.</h2>
-                <p className="mt-0.5 text-sm text-zinc-500">
-                  We’ll match online pieces around it.
-                </p>
-              </div>
-            </div>
-
-            <label className="group block cursor-pointer overflow-hidden rounded-[26px] border border-dashed border-white/[0.14] bg-white/[0.03] p-5 transition duration-200 hover:scale-[1.015] hover:border-white/25 hover:bg-white/[0.06]">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(event) => handleUpload(event.target.files?.[0])}
-              />
-
-              <div className="flex min-h-64 flex-col items-center justify-center rounded-[22px] border border-white/[0.06] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent px-5 py-8 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.05] text-2xl shadow-lg shadow-black/20">
-                  +
-                </div>
-
-                <p className="text-lg font-semibold text-white">Choose clothing photo</p>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-500">
-                  Upload a clear picture of one item you already own.
-                </p>
-
-                <div className="mt-5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400 transition group-hover:border-white/20 group-hover:text-white">
-                  Upload image
-                </div>
-              </div>
-            </label>
-          </section>
-        )}
-
-        {budget && uploadedImage && !country && (
-          <section className="space-y-3">
-            <div className="mb-5 flex items-start gap-4">
-              <BackButton
-                onClick={() => {
-                  setUploadedImage(null);
-                  setUploadedFileName(null);
-                }}
-              />
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Where are you?</h2>
-                <p className="mt-0.5 text-sm text-zinc-500">
-                  Keeps links and prices relevant.
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-4 overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
-              <div className="relative h-44 bg-zinc-950">
-                <img
-                  src={uploadedImage}
-                  alt="Uploaded clothing item"
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/10" />
-              </div>
-
-              <div className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
-                    Uploaded item
-                  </p>
-                  <p className="mt-1 max-w-[220px] truncate text-sm font-semibold text-zinc-100">
-                    {uploadedFileName ?? "Clothing photo"}
-                  </p>
-                </div>
-
-                <label className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition hover:border-white/20 hover:text-white">
-                  Change
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(event) => handleUpload(event.target.files?.[0])}
-                  />
-                </label>
-              </div>
-            </div>
-
-            {COUNTRY_OPTIONS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setCountry(c)}
-                className="group w-full rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-5 py-4 text-left transition duration-200 hover:scale-[1.025] hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.99]"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-semibold text-white">{c}</p>
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 transition group-hover:text-zinc-400">
-                    Select →
-                  </span>
-                </div>
-              </button>
-            ))}
-          </section>
-        )}
-
-        {showResult && outfit && country && budget && uploadedImage && (
+        {showResult && outfit && budget && uploadedImage && (
           <section>
             <div className="mb-4 flex items-center justify-between gap-3">
-              <BackButton onClick={() => setCountry(null)} />
+              <BackButton onClick={() => setBudget(null)} />
               <button
                 onClick={resetAll}
                 className="inline-flex rounded-full border border-white/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-black transition hover:bg-zinc-100"
@@ -508,10 +693,10 @@ export default function Home() {
 
                 <div className="relative flex h-full flex-col justify-end p-6">
                   <p className="mb-1.5 text-[10px] uppercase tracking-[0.28em] text-white/50">
-                    Matched around your uploaded item
+                    Step 3 of 3
                   </p>
                   <h2 className="text-2xl font-bold leading-tight tracking-tight text-white">
-                    {outfit.vibe}
+                    {outfit.title}
                   </h2>
                   <p className="mt-2 text-xs text-white/50">{outfit.imageLabel}</p>
                 </div>
@@ -520,7 +705,6 @@ export default function Home() {
               <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
                 <div className="flex flex-wrap gap-2">
                   <MiniPill>{BUDGET_LABELS[budget]}</MiniPill>
-                  <MiniPill>{country}</MiniPill>
                 </div>
 
                 <div className="text-right">
@@ -532,19 +716,19 @@ export default function Home() {
               </div>
 
               <div className="border-b border-white/[0.06] px-5 py-4">
-                <p className="text-sm leading-relaxed text-zinc-400">{uploadExplanation}</p>
+                <p className="text-sm leading-relaxed text-zinc-400">{resultNote}</p>
               </div>
 
               <div className="px-5 py-5">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
-                    Suggested pieces
+                    AI matched pieces
                   </p>
                   <p className="text-[11px] text-zinc-600">{outfit.items.length} items</p>
                 </div>
 
                 <div className="space-y-2.5">
-                  {outfit.items.map((item, i) => (
+                  {outfit.items.map((item: OutfitItem, i: number) => (
                     <div
                       key={i}
                       className="group overflow-hidden rounded-[20px] border border-white/[0.07] bg-zinc-950/60 transition duration-200 hover:scale-[1.012] hover:border-white/[0.15]"
@@ -616,7 +800,7 @@ export default function Home() {
                   <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
                     Region
                   </p>
-                  <p className="mt-1.5 text-sm font-semibold text-zinc-100">{country}</p>
+                  <p className="mt-1.5 text-sm font-semibold text-zinc-100">Europe</p>
                 </div>
               </div>
             </div>
