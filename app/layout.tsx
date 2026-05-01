@@ -27,7 +27,14 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Skimlinks Script */}
+        <script
+          type="text/javascript"
+          src="https://s.skimresources.com/js/302284X1790278.skimlinks.js"
+        ></script>
+      </body>
     </html>
   );
 }

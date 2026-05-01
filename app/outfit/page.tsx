@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getProductsForCategories } from "../../lib/products";
 
 type Budget = "affordable" | "mid" | "premium";
 
@@ -146,159 +147,6 @@ const OUTFITS: OutfitMap = {
   },
 };
 
-const PRODUCT_MAP: Record<string, OutfitItem[]> = {
-  "white t-shirt": [
-    {
-      label: "White Supima cotton crew-neck T-shirt",
-      brand: "Uniqlo",
-      url: "https://www.uniqlo.com/uk/en/products/E455365-000/00?colorDisplayCode=00&sizeDisplayCode=003",
-      price: "€20",
-      image: PLACEHOLDER_IMAGE,
-      note: "Clean neutral base",
-    },
-  ],
-  "black t-shirt": [
-    {
-      label: "Black regular fit T-shirt",
-      brand: "H&M",
-      url: "https://www2.hm.com/en_gb/men/shop-by-product/t-shirts-and-tanks.html",
-      price: "€15",
-      image: PLACEHOLDER_IMAGE,
-      note: "Easy dark layer",
-    },
-  ],
-  "oxford shirt": [
-    {
-      label: "White regular fit Oxford shirt",
-      brand: "H&M",
-      url: "https://www2.hm.com/en_gb/productpage.1013956002.html",
-      price: "€25",
-      image: PLACEHOLDER_IMAGE,
-      note: "Sharpens the outfit",
-    },
-  ],
-  overshirt: [
-    {
-      label: "Relaxed fit overshirt",
-      brand: "COS",
-      url: "https://www.cos.com/en-gb/men/shirts/overshirts.html",
-      price: "€75",
-      image: PLACEHOLDER_IMAGE,
-      note: "Adds structure",
-    },
-  ],
-  hoodie: [
-    {
-      label: "Relaxed fit hoodie",
-      brand: "H&M",
-      url: "https://www2.hm.com/en_gb/men/shop-by-product/hoodies-sweatshirts.html",
-      price: "€30",
-      image: PLACEHOLDER_IMAGE,
-      note: "Casual layer",
-    },
-  ],
-  chinos: [
-    {
-      label: "Slim fit cotton chinos",
-      brand: "H&M",
-      url: "https://www2.hm.com/en_gb/men/shop-by-product/trousers/chinos.html",
-      price: "€30",
-      image: PLACEHOLDER_IMAGE,
-      note: "Clean everyday base",
-    },
-  ],
-  "black jeans": [
-    {
-      label: "501 Original Fit black jeans",
-      brand: "Levi's",
-      url: "https://www.levi.com/GB/en_GB/clothing/men/jeans/straight/501-original-fit-mens-jeans/p/005010165",
-      price: "€35+",
-      image: PLACEHOLDER_IMAGE,
-      note: "Reliable dark base",
-    },
-  ],
-  "blue jeans": [
-    {
-      label: "Regular fit blue jeans",
-      brand: "H&M",
-      url: "https://www2.hm.com/en_gb/men/shop-by-product/jeans.html",
-      price: "€30",
-      image: PLACEHOLDER_IMAGE,
-      note: "Classic casual base",
-    },
-  ],
-  "tailored trousers": [
-    {
-      label: "Slim tapered trousers",
-      brand: "Reiss",
-      url: "https://www.reiss.com/men/trousers",
-      price: "€80",
-      image: PLACEHOLDER_IMAGE,
-      note: "Smarter silhouette",
-    },
-  ],
-  "white sneakers": [
-    {
-      label: "Leather trainers in white",
-      brand: "ARKET",
-      url: "https://www.arket.com/en-eu/product/leather-trainers-white-1277664001/",
-      price: "€60",
-      image: PLACEHOLDER_IMAGE,
-      note: "Clean finish",
-    },
-  ],
-  "black sneakers": [
-    {
-      label: "Black low-profile trainers",
-      brand: "ASOS DESIGN",
-      url: "https://www.asos.com/men/shoes-boots-trainers/trainers/cat/?cid=5775",
-      price: "€25+",
-      image: PLACEHOLDER_IMAGE,
-      note: "Simple dark finish",
-    },
-  ],
-  loafers: [
-    {
-      label: "Leather loafers",
-      brand: "Massimo Dutti",
-      url: "https://www.massimodutti.com/gb/men/shoes/loafers-n1477",
-      price: "€85",
-      image: PLACEHOLDER_IMAGE,
-      note: "Dressy but relaxed",
-    },
-  ],
-  "chelsea boots": [
-    {
-      label: "Black Chelsea boots",
-      brand: "Ted Baker",
-      url: "https://www.tedbaker.com/uk/mens/shoes-and-boots/chelsea-boots",
-      price: "€140",
-      image: PLACEHOLDER_IMAGE,
-      note: "Strong silhouette",
-    },
-  ],
-  blazer: [
-    {
-      label: "Unstructured wool blazer",
-      brand: "ARKET",
-      url: "https://www.arket.com/en-gb/men/blazers.html",
-      price: "€110",
-      image: PLACEHOLDER_IMAGE,
-      note: "Instant polish",
-    },
-  ],
-  "minimal accessory": [
-    {
-      label: "Slim leather card wallet",
-      brand: "Bellroy",
-      url: "https://bellroy.com/products/card-sleeve-wallet/leather/charcoal",
-      price: "€35",
-      image: PLACEHOLDER_IMAGE,
-      note: "Small polish detail",
-    },
-  ],
-};
-
 const BUDGET_OPTIONS: {
   value: Budget;
   label: string;
@@ -414,12 +262,7 @@ export default function Home() {
 
   const aiRecommendedItems = aiAnalysis?.recommendedPieces || [];
 
-  const dynamicItems = aiRecommendedItems
-    .map((piece: string) => {
-      const items = PRODUCT_MAP[piece.toLowerCase()] || [];
-      return items[Math.floor(Math.random() * items.length)];
-    })
-    .filter(Boolean);
+  const dynamicItems = budget ? getProductsForCategories(aiRecommendedItems, budget) : [];
   const heroItem = dynamicItems[0];
 
   const outfit =
