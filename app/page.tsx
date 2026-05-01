@@ -23,22 +23,22 @@ export default function LandingPage() {
       <section className="mx-auto max-w-md px-5 pt-16 pb-20">
         <div className="mb-6 inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
           <span className="text-[11px] uppercase tracking-[0.22em] text-zinc-400">
-            Upload one item. Match the rest.
+            AI outfit matching
           </span>
         </div>
 
         <h1 className="text-[3rem] font-bold leading-[1.02] tracking-tight mb-6">
-          Stop guessing
+          Upload one item.
           <br />
-          <span className="text-zinc-400">what goes with it.</span>
+          <span className="text-zinc-400">Match the rest.</span>
         </h1>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-xs">
-          Outfitted helps you upload one clothing item and find matching pieces online — based on your budget and location.
+          Outfitted helps you build an outfit around something you already own.
         </p>
 
         <p className="text-sm text-zinc-500 mb-10 max-w-xs">
-          Built for guys who want better outfits without overthinking every piece.
+          Upload a clothing photo. Get matching pieces from European retailers.
         </p>
 
         <div className="flex flex-col gap-3 mb-12">
@@ -53,12 +53,12 @@ export default function LandingPage() {
             href="#how-it-works"
             className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm uppercase tracking-widest text-zinc-400 transition hover:scale-[1.02] hover:border-white/20 hover:text-white"
           >
-            See how it works
+            How it works
           </a>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {["Upload a photo", "No overthinking", "Looks intentional", "Real brands"].map((pill) => (
+          {["Upload photo", "AI matching", "European retailers", "Free to try"].map((pill) => (
             <span
               key={pill}
               className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-zinc-400"
@@ -91,23 +91,18 @@ export default function LandingPage() {
           {[
             {
               step: "01",
-              title: "Set your budget",
-              desc: "Affordable, mid-range, or premium. You decide the level.",
+              title: "Upload your item",
+              desc: "Add a clear photo of one clothing piece.",
             },
             {
               step: "02",
-              title: "Upload your item",
-              desc: "Add a clear photo of one piece you already own.",
+              title: "AI reads the style",
+              desc: "We detect the item, colour, and outfit direction.",
             },
             {
               step: "03",
-              title: "Choose your country",
-              desc: "So links, prices, and stores stay relevant.",
-            },
-            {
-              step: "04",
-              title: "Get matching pieces",
-              desc: "A clean set of online items that work around your uploaded piece.",
+              title: "Shop matching pieces",
+              desc: "Get products that work around your uploaded item.",
             },
           ].map((item) => (
             <div
@@ -136,11 +131,11 @@ export default function LandingPage() {
         <h2 className="text-[2.6rem] font-bold leading-[1.02] tracking-tight mb-5">
           One item.
           <br />
-          <span className="text-zinc-400">Full outfit.</span>
+          <span className="text-zinc-400">Better outfit.</span>
         </h2>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-10 max-w-xs mx-auto">
-          Upload a clothing photo, pick your budget, and get pieces that make it work.
+          Start with a piece you already own and find what to wear with it.
         </p>
 
         <Link
@@ -149,10 +144,6 @@ export default function LandingPage() {
         >
           Upload my item
         </Link>
-
-        <p className="mt-6 text-xs text-zinc-600 tracking-wide">
-          Free · No signup
-        </p>
       </section>
 
       {/* Footer */}
@@ -161,7 +152,7 @@ export default function LandingPage() {
           Outfitted
         </span>
         <span className="text-xs text-zinc-700">
-          Upload one item. Match the rest.
+          AI outfit matching, simplified.
         </span>
       </footer>
 

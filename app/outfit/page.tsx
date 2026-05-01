@@ -5,6 +5,39 @@ import { getProductsForCategories } from "../../lib/products";
 
 type Budget = "affordable" | "mid" | "premium";
 
+type OutfitDirection = "casual clean" | "smart casual" | "evening polished";
+
+/** AI analysis from /api/analyze-item; fields optional so older responses stay valid. */
+type AIAnalysis = {
+  itemType?: string;
+  mainColor?: string;
+  style?: string;
+  recommendedPieces?: string[];
+  reason?: string;
+  outfitDirection?: OutfitDirection;
+};
+
+const OUTFIT_DIRECTION_VALUES: readonly OutfitDirection[] = [
+  "casual clean",
+  "smart casual",
+  "evening polished",
+];
+
+function normalizeOutfitDirection(raw: unknown): OutfitDirection {
+  if (typeof raw !== "string") return "smart casual";
+  const t = raw.toLowerCase().trim();
+  return OUTFIT_DIRECTION_VALUES.includes(t as OutfitDirection)
+    ? (t as OutfitDirection)
+    : "smart casual";
+}
+
+function formatOutfitDirectionLabel(direction: OutfitDirection): string {
+  return direction
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 interface OutfitItem {
   label: string;
   url: string;
@@ -184,7 +217,22 @@ const BUDGET_LABELS: Record<Budget, string> = {
 };
 
 function buildResultNote(budget: Budget) {
-  return `Built around your upload with a ${BUDGET_LABELS[budget].toLowerCase()} budget.`;
+  if (budget === "affordable") {
+    return "Matched around your item on an affordable budget.";
+  }
+  if (budget === "mid") {
+    return "Matched around your item on a mid-range budget.";
+  }
+  return "Matched around your item on a premium budget.";
+}
+
+/** Title override when AI returns `outfitDirection`; falls back to budget-based title. */
+function formatOutfitDirectionTitle(direction?: string | null): string | null {
+  const t = typeof direction === "string" ? direction.toLowerCase().trim() : "";
+  if (t === "casual clean") return "Casual Clean Match";
+  if (t === "smart casual") return "Smart Casual Match";
+  if (t === "evening polished") return "Evening Polished Match";
+  return null;
 }
 
 function MiniPill({ children }: { children: React.ReactNode }) {
@@ -255,12 +303,15 @@ function ProductImage({
 
 export default function Home() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [uploadConfirmed, setUploadConfirmed] = useState(false);
   const [budget, setBudget] = useState<Budget | null>(null);
 
-  const aiRecommendedItems = aiAnalysis?.recommendedPieces || [];
+  const aiRecommendedItems = (aiAnalysis?.recommendedPieces ?? []).slice(0, 3);
+  const resolvedOutfitDirection = normalizeOutfitDirection(
+    aiAnalysis?.outfitDirection
+  );
 
   const dynamicItems = budget ? getProductsForCategories(aiRecommendedItems, budget) : [];
   const heroItem = dynamicItems[0];
@@ -322,6 +373,7 @@ export default function Home() {
     setUploadedFileName(null);
     setUploadConfirmed(false);
     setBudget(null);
+    setAiAnalysis(null);
   }
 
   const stepNumber = !uploadedImage
@@ -539,7 +591,8 @@ export default function Home() {
                     Step 3 of 3
                   </p>
                   <h2 className="text-2xl font-bold leading-tight tracking-tight text-white">
-                    {outfit.title}
+                    {formatOutfitDirectionTitle(aiAnalysis?.outfitDirection) ??
+                      outfit.title}
                   </h2>
                   <p className="mt-2 text-xs text-white/50">{outfit.imageLabel}</p>
                 </div>
@@ -563,9 +616,27 @@ export default function Home() {
               </div>
 
               <div className="px-5 py-5">
+                {aiAnalysis && (
+                  <div className="mb-4 space-y-2.5">
+                    {aiAnalysis.reason && (
+                      <p className="text-sm leading-relaxed text-zinc-400">
+                        {aiAnalysis.reason}
+                      </p>
+                    )}
+                    <p className="text-[11px] leading-relaxed text-zinc-500">
+                      <span className="uppercase tracking-[0.16em] text-zinc-600">
+                        Direction:{" "}
+                      </span>
+                      <span className="font-medium text-zinc-300">
+                        {formatOutfitDirectionLabel(resolvedOutfitDirection)}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
-                    AI matched pieces
+                    Recommended pieces
                   </p>
                   <p className="text-[11px] text-zinc-600">{outfit.items.length} items</p>
                 </div>
@@ -610,7 +681,7 @@ export default function Home() {
                             rel="noreferrer"
                             className="mt-3 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                           >
-                            View item →
+                            Shop piece →
                           </a>
                         </div>
                       </div>
