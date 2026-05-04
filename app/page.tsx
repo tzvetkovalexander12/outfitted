@@ -37,8 +37,14 @@ export default function LandingPage() {
           Outfitted helps you build an outfit around something you already own.
         </p>
 
-        <p className="text-sm text-zinc-500 mb-10 max-w-xs">
-          Upload a clothing photo. Get matching pieces from European retailers.
+        <p className="text-sm text-zinc-500 mb-3 max-w-xs">
+          Upload a clothing photo. Get matching pieces from online retailers.
+        </p>
+
+        <p className="text-sm text-zinc-500 mb-3 max-w-xs">No signup needed. Free to try.</p>
+
+        <p className="text-xs text-zinc-600 mb-10 max-w-xs leading-relaxed">
+          Photos are only used to generate your outfit recommendation.
         </p>
 
         <div className="flex flex-col gap-3 mb-12">
@@ -58,7 +64,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {["Upload photo", "AI matching", "European retailers", "Free to try"].map((pill) => (
+          {["Upload photo", "AI matching", "Online retailers", "Free to try"].map((pill) => (
             <span
               key={pill}
               className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-zinc-400"
@@ -134,6 +140,7 @@ export default function LandingPage() {
               Outfitted
             </span>
             <p className="mt-1 text-xs text-zinc-700">AI outfit matching, simplified.</p>
+            <p className="mt-2 text-[11px] text-zinc-700">Free to use · Affiliate-supported</p>
           </div>
           <nav
             className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.14em] text-zinc-500"

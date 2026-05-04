@@ -65,6 +65,22 @@ type OutfitMap = {
 
 const PLACEHOLDER_IMAGE = "/products/uniqlo-white-tee.jpg";
 
+/** Set to true when `public/products/sample-black-trousers.webp` exists. */
+const USE_LOCAL_SAMPLE_IMAGE = false;
+const SAMPLE_IMAGE = "/products/sample-black-trousers.webp";
+const SAMPLE_IMAGE_REMOTE =
+  "https://image.hm.com/assets/hm/39/96/39966692dce4819fd2cb12b0f53e2edc41b69b40.jpg?imwidth=1260";
+
+const SAMPLE_ANALYSIS: AIAnalysis = {
+  itemType: "tailored trousers",
+  mainColor: "black",
+  style: "wide-leg, clean, smart-casual",
+  outfitDirection: "casual clean",
+  recommendedPieces: ["white t-shirt", "overshirt", "white sneakers"],
+  reason:
+    "Your black tailored trousers create a clean base. A white tee adds contrast, an overshirt keeps the outfit relaxed, and white trainers make it easy to wear day-to-day.",
+};
+
 const OUTFITS: OutfitMap = {
   affordable: {
     title: "Easy Everyday Match",
@@ -315,7 +331,6 @@ export default function Home() {
   );
 
   const dynamicItems = budget ? getProductsForCategories(aiRecommendedItems, budget) : [];
-  const heroItem = dynamicItems[0];
 
   const outfit =
     budget && dynamicItems.length > 0
@@ -327,12 +342,15 @@ export default function Home() {
 
   useEffect(() => {
     return () => {
-      if (uploadedImage) URL.revokeObjectURL(uploadedImage);
+      if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
     };
   }, [uploadedImage]);
 
   async function handleUpload(file: File | undefined) {
     if (!file) return;
+
+    if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
+    setUploadedFileName(file.name);
 
     const preview = URL.createObjectURL(file);
     setUploadedImage(preview);
@@ -368,8 +386,15 @@ export default function Home() {
     }
   }
 
+  function handleTrySample() {
+    if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
+    setUploadedImage(USE_LOCAL_SAMPLE_IMAGE ? SAMPLE_IMAGE : SAMPLE_IMAGE_REMOTE);
+    setUploadedFileName("Sample black trousers");
+    setAiAnalysis(SAMPLE_ANALYSIS);
+  }
+
   function resetAll() {
-    if (uploadedImage) URL.revokeObjectURL(uploadedImage);
+    if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
     setUploadedImage(null);
     setUploadedFileName(null);
     setUploadConfirmed(false);
@@ -461,6 +486,21 @@ export default function Home() {
                 </div>
               </div>
             </label>
+
+            <p className="text-center text-xs text-zinc-500">
+              Photos are analyzed for clothing only.
+            </p>
+            <p className="text-center text-[11px] leading-relaxed text-zinc-600">
+              Your photo is only used to generate outfit suggestions.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleTrySample}
+              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+            >
+              Try with sample item
+            </button>
           </section>
         )}
 
@@ -611,14 +651,16 @@ export default function Home() {
               </div>
 
               <div className="px-5 py-5">
-                {aiAnalysis && (
-                  <div className="mb-4 space-y-2.5">
-                    {aiAnalysis.reason && (
-                      <p className="text-sm leading-relaxed text-zinc-400">
-                        {aiAnalysis.reason}
-                      </p>
-                    )}
-                    <p className="text-[11px] leading-relaxed text-zinc-500">
+                <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
+                    Why this works
+                  </p>
+                  <p className="mt-2.5 text-sm leading-relaxed text-zinc-300">
+                    {aiAnalysis?.reason?.trim() ||
+                      "Matched around your uploaded item based on style, colour, and outfit direction."}
+                  </p>
+                  {aiAnalysis && (
+                    <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
                       <span className="uppercase tracking-[0.16em] text-zinc-600">
                         Direction:{" "}
                       </span>
@@ -626,8 +668,12 @@ export default function Home() {
                         {formatOutfitDirectionLabel(resolvedOutfitDirection)}
                       </span>
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
+
+                <p className="mb-5 text-[11px] leading-relaxed text-zinc-600">
+                  Products are selected based on the AI outfit direction and your budget preference.
+                </p>
 
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
@@ -663,7 +709,9 @@ export default function Home() {
                           </div>
 
                           {item.note && (
-                            <p className="mt-1.5 text-xs text-zinc-600">{item.note}</p>
+                            <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
+                              {item.note}
+                            </p>
                           )}
 
                           <a
