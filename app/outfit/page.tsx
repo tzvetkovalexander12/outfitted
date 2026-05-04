@@ -598,17 +598,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
-                <div className="flex flex-wrap gap-2">
-                  <MiniPill>{BUDGET_LABELS[budget]}</MiniPill>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
-                    Est. spend
-                  </p>
-                  <p className="text-base font-semibold text-white">{outfit.estimatedTotal}</p>
-                </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.06] px-5 py-3">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
+                  Budget preference
+                </p>
+                <MiniPill>{BUDGET_LABELS[budget]}</MiniPill>
               </div>
 
               <div className="border-b border-white/[0.06] px-5 py-4">
@@ -655,7 +649,7 @@ export default function Home() {
                         />
 
                         <div className="flex-1 p-4">
-                          <div className="flex items-start justify-between gap-2">
+                          <div>
                             <div>
                               {item.brand && (
                                 <p className="mb-0.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">
@@ -665,10 +659,6 @@ export default function Home() {
 
                               <p className="text-sm leading-snug text-zinc-100">{item.label}</p>
                             </div>
-
-                            <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-0.5 text-xs font-semibold text-white">
-                              {item.price}
-                            </span>
                           </div>
 
                           {item.note && (

@@ -126,26 +126,6 @@ export default function LandingPage() {
         <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
-      {/* Final CTA */}
-      <section className="mx-auto max-w-md px-5 py-24 text-center">
-        <h2 className="text-[2.6rem] font-bold leading-[1.02] tracking-tight mb-5">
-          One item.
-          <br />
-          <span className="text-zinc-400">Better outfit.</span>
-        </h2>
-
-        <p className="text-base leading-relaxed text-zinc-400 mb-10 max-w-xs mx-auto">
-          Start with a piece you already own and find what to wear with it.
-        </p>
-
-        <Link
-          href="/outfit"
-          className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-widest text-black transition hover:scale-[1.02] hover:bg-zinc-100 active:scale-[0.99]"
-        >
-          Upload my item
-        </Link>
-      </section>
-
       {/* Footer */}
       <footer className="mx-auto max-w-md px-5 pb-10 border-t border-white/10 pt-8 flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600">
