@@ -127,13 +127,32 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="mx-auto max-w-md px-5 pb-10 border-t border-white/10 pt-8 flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600">
-          Outfitted
-        </span>
-        <span className="text-xs text-zinc-700">
-          AI outfit matching, simplified.
-        </span>
+      <footer className="mx-auto max-w-md border-t border-white/10 px-5 pb-10 pt-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600">
+              Outfitted
+            </span>
+            <p className="mt-1 text-xs text-zinc-700">AI outfit matching, simplified.</p>
+          </div>
+          <nav
+            className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.14em] text-zinc-500"
+            aria-label="Legal and contact"
+          >
+            <Link href="/about" className="transition hover:text-zinc-300">
+              About
+            </Link>
+            <Link href="/privacy" className="transition hover:text-zinc-300">
+              Privacy
+            </Link>
+            <Link href="/affiliate-disclosure" className="transition hover:text-zinc-300">
+              Affiliate Disclosure
+            </Link>
+            <Link href="/contact" className="transition hover:text-zinc-300">
+              Contact
+            </Link>
+          </nav>
+        </div>
       </footer>
 
     </main>

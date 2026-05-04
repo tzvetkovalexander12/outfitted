@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getProductsForCategories } from "../../lib/products";
 
@@ -711,6 +712,26 @@ export default function Home() {
           </section>
         )}
       </div>
+
+      <footer className="mx-auto max-w-md border-t border-white/[0.08] px-4 pb-10 pt-10 sm:px-5">
+        <nav
+          className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.16em] text-zinc-600"
+          aria-label="Legal and contact"
+        >
+          <Link href="/about" className="transition hover:text-zinc-400">
+            About
+          </Link>
+          <Link href="/privacy" className="transition hover:text-zinc-400">
+            Privacy
+          </Link>
+          <Link href="/affiliate-disclosure" className="transition hover:text-zinc-400">
+            Affiliate Disclosure
+          </Link>
+          <Link href="/contact" className="transition hover:text-zinc-400">
+            Contact
+          </Link>
+        </nav>
+      </footer>
     </main>
   );
 }
