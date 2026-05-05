@@ -407,6 +407,13 @@ const VIBE_LABELS: Record<VibeType, string> = {
   "expensive-looking": "Expensive-looking",
 };
 
+function getAllowedBudgets(vibeType: VibeType | null): Budget[] {
+  if (vibeType === "expensive-looking" || vibeType === "bold") {
+    return ["mid", "premium"];
+  }
+  return ["affordable", "mid", "premium"];
+}
+
 function buildResultNote(budget: Budget) {
   if (budget === "affordable") {
     return "Matched around your item on an affordable budget.";
@@ -654,6 +661,13 @@ export default function Home() {
   );
 
   const resultNote = budget ? buildResultNote(budget) : null;
+  const allowedBudgets = getAllowedBudgets(vibeType);
+
+  useEffect(() => {
+    if (budget && !allowedBudgets.includes(budget)) {
+      setBudget(null);
+    }
+  }, [allowedBudgets, budget]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(to_bottom,#0a0a0c,#111113_40%,#0a0a0c)] text-white">
@@ -917,7 +931,23 @@ export default function Home() {
               </div>
             )}
 
-            {BUDGET_OPTIONS.map((opt) => (
+            {vibeType === "expensive-looking" && (
+              <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                <p className="text-xs leading-relaxed text-zinc-500">
+                  Expensive-looking outfits work best with mid-range or premium pieces.
+                </p>
+              </div>
+            )}
+
+            {vibeType === "bold" && (
+              <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                <p className="text-xs leading-relaxed text-zinc-500">
+                  Bold outfits usually need stronger pieces, so mid-range or premium works best.
+                </p>
+              </div>
+            )}
+
+            {BUDGET_OPTIONS.filter((opt) => allowedBudgets.includes(opt.value)).map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => handleBudgetSelect(opt.value)}

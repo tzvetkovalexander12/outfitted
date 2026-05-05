@@ -78,6 +78,13 @@ function isStrongOxfordShirt(product: Product): boolean {
   );
 }
 
+function isRealChelseaBoot(product: Product): boolean {
+  if (product.category !== "chelsea boots") return false;
+  const label = product.label.toLowerCase();
+  const url = product.url.toLowerCase();
+  return label.includes("chelsea") || url.includes("chelsea");
+}
+
 export const PRODUCTS: Product[] = [
   // WHITE T-SHIRT
   {
@@ -194,6 +201,47 @@ export const PRODUCTS: Product[] = [
     image:
       "https://media.arket.com/assets/006/e3/d6/e3d687cfbd232ebe7c70380280a5734d35c1cf92.jpg?imwidth=1260",
     note: "Lends a crisp line that works for both workday and weekend.",
+    isAffiliate: true,
+  },
+  {
+    id: "massimo-dutti-oxford-shirt-001",
+    category: "oxford shirt",
+    brand: "Massimo Dutti",
+    label: "Regular Fit Oxford Shirt",
+    price: "Check price",
+    budget: "premium",
+    region: "Europe",
+    url: "https://www.massimodutti.com/gb/regular-fit-oxford-shirt-l01993255?pelement=57401769&banner=true",
+    image: "https://static.massimodutti.net/3/static2/itxwebstandard/logo/logo.png",
+    note: "Adds a cleaner, more premium shirt option for polished outfits.",
+    isAffiliate: true,
+  },
+  {
+    id: "reiss-oxford-soft-blue-001",
+    category: "oxford shirt",
+    brand: "Reiss",
+    label: "Soft Blue Oxford Shirt",
+    price: "Check price",
+    budget: "premium",
+    region: "Europe",
+    url: "https://www.reiss.com/style/st378878/d40078",
+    image:
+      "https://cdn.platform.next/common/items/default/default/itemimages/3_4Ratio/product/lge/D40078s.jpg?im=Resize,width=750",
+    note: "Softens the outfit while keeping it smart and refined.",
+    isAffiliate: true,
+  },
+  {
+    id: "reiss-oxford-white-001",
+    category: "oxford shirt",
+    brand: "Reiss",
+    label: "White Oxford Shirt",
+    price: "Check price",
+    budget: "premium",
+    region: "Europe",
+    url: "https://www.reiss.com/style/st378878/d43750",
+    image:
+      "https://cdn.platform.next/common/items/default/default/itemimages/3_4Ratio/product/lge/D43750s.jpg?im=Resize,width=750",
+    note: "A polished shirt choice for dinner, work, and expensive-looking outfits.",
     isAffiliate: true,
   },
   {
@@ -504,6 +552,62 @@ export const PRODUCTS: Product[] = [
     note: "Keeps things simple and dark at the foot for an easy smart-casual finish.",
     isAffiliate: true,
   },
+  {
+    id: "clarks-newford-easy-chelsea-001",
+    category: "chelsea boots",
+    brand: "Clarks",
+    label: "Newford Easy Chelsea Boots",
+    price: "Check price",
+    budget: "mid",
+    region: "Europe",
+    url: "https://www.clarks.com/en-gb/newford-easy/26183379-p",
+    image:
+      "https://cdn.media.amplience.net/i/clarks/26183379_GW_1?fmt=auto&img404=imageNotFound&w=2088&qlt=75",
+    note: "Adds a smart-casual boot finish without making the outfit too formal.",
+    isAffiliate: true,
+  },
+  {
+    id: "zara-leather-chelsea-boots-black-001",
+    category: "chelsea boots",
+    brand: "Zara",
+    label: "Black Leather Chelsea Boots",
+    price: "Check price",
+    budget: "mid",
+    region: "Europe",
+    url: "https://www.zara.com/uk/en/leather-chelsea-boots-p12028720.html?v1=495702943&v2=2436333",
+    image:
+      "https://static.zara.net/assets/public/bb97/4730/a0ce4ee29ce4/708623fff7e4/12028720800-a3/12028720800-a3.jpg?ts=1761304450180&w=560",
+    note: "Sharpens darker outfits with a clean boot silhouette.",
+    isAffiliate: true,
+  },
+  {
+    id: "zara-leather-chelsea-boots-brown-001",
+    category: "chelsea boots",
+    brand: "Zara",
+    label: "Brown Leather Chelsea Boots",
+    price: "Check price",
+    budget: "mid",
+    region: "Europe",
+    url: "https://www.zara.com/uk/en/leather-chelsea-boots-p12000720.html?v1=495694118&v2=2436333",
+    image:
+      "https://static.zara.net/assets/public/b5e2/8bd8/e2d1476e9809/b35c927844f5/12000720002-a2/12000720002-a2.jpg?ts=1765365449937&w=560",
+    note: "Adds warmth and polish to neutral outfits.",
+    isAffiliate: true,
+  },
+  {
+    id: "zara-pointed-chelsea-boots-001",
+    category: "chelsea boots",
+    brand: "Zara",
+    label: "Pointed Chelsea Boots",
+    price: "Check price",
+    budget: "premium",
+    region: "Europe",
+    url: "https://www.zara.com/uk/en/pointed-chelsea-boots-p12060720.html?v1=495669696&v2=2436333",
+    image:
+      "https://static.zara.net/assets/public/2a7e/b432/00304bd18d43/448a72725c57/12060720800-a2/12060720800-a2.jpg?ts=1768831691541&w=560",
+    note: "Creates a sharper evening silhouette for bold or polished outfits.",
+    isAffiliate: true,
+  },
 
   // BLAZER
   {
@@ -650,6 +754,48 @@ export const PRODUCTS: Product[] = [
     note: "Frames the face and adds a quiet, confident finish.",
     isAffiliate: true,
   },
+  {
+    id: "hm-necklace-bracelet-black-001",
+    category: "minimal accessory",
+    brand: "H&M",
+    label: "Black Necklace and Bracelet Set",
+    price: "Check price",
+    budget: "affordable",
+    region: "Europe",
+    url: "https://www2.hm.com/en_gb/productpage.1294541002.html",
+    image:
+      "https://image.hm.com/assets/hm/1c/eb/1ceb542b546b179f0302ea1a99c653a9904f4fab.jpg?imwidth=1260",
+    note: "Adds a subtle dark detail without overpowering the outfit.",
+    isAffiliate: true,
+  },
+  {
+    id: "zara-embossed-leather-belt-001",
+    category: "minimal accessory",
+    brand: "Zara",
+    label: "Embossed Leather Belt",
+    price: "Check price",
+    budget: "mid",
+    region: "Europe",
+    url: "https://www.zara.com/uk/en/embossed-leather-belt-p05919411.html?v1=500524833&v2=2436444",
+    image:
+      "https://static.zara.net/assets/public/ba50/b7e0/0ed843fca37e/2e9b29dcc7af/05919411800-a1/05919411800-a1.jpg?ts=1769771570758&w=560",
+    note: "Sharpens the outfit with a clean leather finishing detail.",
+    isAffiliate: true,
+  },
+  {
+    id: "zara-sheepskin-leather-belt-001",
+    category: "minimal accessory",
+    brand: "Zara",
+    label: "Leather Belt With Sheepskin Finish",
+    price: "Check price",
+    budget: "mid",
+    region: "Europe",
+    url: "https://www.zara.com/uk/en/sheepskin-finish-leather-belt-p02823402.html?v1=495693873&v2=2436444",
+    image:
+      "https://static.zara.net/assets/public/c679/41fe/75d34bfebcff/c6977e0c6015/02823402800-e1/02823402800-e1.jpg?ts=1763456138005&w=560",
+    note: "Adds texture while keeping the outfit understated.",
+    isAffiliate: true,
+  },
 
   // BLUE JEANS
   {
@@ -774,6 +920,10 @@ export function getProductsForCategories(
         ? pool.filter(isStrongOxfordShirt).length > 0
           ? pool.filter(isStrongOxfordShirt)
           : pool
+        : category === "chelsea boots"
+          ? pool.filter(isRealChelseaBoot).length > 0
+            ? pool.filter(isRealChelseaBoot)
+            : pool
         : pool;
 
     const next = pickRandomProduct(selectionPool);
