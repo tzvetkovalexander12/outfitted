@@ -65,6 +65,19 @@ function pickRandomProduct(products: Product[]): Product | undefined {
   return products[index];
 }
 
+function isStrongOxfordShirt(product: Product): boolean {
+  if (product.category !== "oxford shirt") return false;
+  const label = product.label.toLowerCase();
+  const note = product.note.toLowerCase();
+  return (
+    label.includes("oxford") ||
+    label.includes("formal shirt") ||
+    label.includes("dress shirt") ||
+    note.includes("clean") ||
+    note.includes("crisp")
+  );
+}
+
 export const PRODUCTS: Product[] = [
   // WHITE T-SHIRT
   {
@@ -77,7 +90,7 @@ export const PRODUCTS: Product[] = [
     region: "Europe",
     url: "https://www.zara.com/uk/en/basic-medium-weight-t-shirt--02-p01887411.html?v1=499201787",
     image:
-      "https://static.zara.net/assets/public/9408/d169/8ccd49a980d1/da1d17371317/01887411800-p/01887411800-p.jpg?ts=1766492296589&w=1024",
+      "https://rdl.ink/render/https%3A%2F%2Fwww.zara.com%2Fuk%2Fen%2Fbasic-medium-weight-t-shirt--02-p01887411.html%3Fv1%3D499201787",
     note: "Adds clean contrast without making the outfit too formal.",
     isAffiliate: true,
   },
@@ -185,16 +198,16 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "zara-shirt-pocket-001",
-    category: "oxford shirt",
+    category: "overshirt",
     brand: "Zara",
-    label: "Relaxed pocket shirt",
+    label: "Relaxed pocket overshirt",
     price: "Check price",
     budget: "mid",
     region: "Europe",
     url: "https://www.zara.com/uk/en/relaxed-fit-shirt-with-pockets-p05679132.html?v1=532748110&v2=2431994",
     image:
       "https://static.zara.net/assets/public/e9bd/a3e2/5a3f40c89852/e826cdefc0fd/05679132403-p/05679132403-p.jpg?ts=1777381531750&w=560",
-    note: "Eases the formality of the rest of the look with a softer drape.",
+    note: "Adds a softer drape as a light layer while keeping the look polished.",
     isAffiliate: true,
   },
 
@@ -756,7 +769,14 @@ export function getProductsForCategories(
               product.category === category && !seen.has(product.id)
           );
 
-    const next = pickRandomProduct(pool);
+    const selectionPool =
+      category === "oxford shirt"
+        ? pool.filter(isStrongOxfordShirt).length > 0
+          ? pool.filter(isStrongOxfordShirt)
+          : pool
+        : pool;
+
+    const next = pickRandomProduct(selectionPool);
     if (!next) continue;
 
     selected.push(next);

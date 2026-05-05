@@ -34,11 +34,11 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-xs">
-          Outfitted helps you build an outfit around something you already own.
+          Upload a clothing item, choose the occasion and vibe, and get pieces that match.
         </p>
 
         <p className="text-sm text-zinc-500 mb-3 max-w-xs">
-          Upload a clothing photo. Get matching pieces from online retailers.
+          Built to make outfit decisions faster, sharper, and less generic.
         </p>
 
         <p className="text-sm text-zinc-500 mb-3 max-w-xs">No signup needed. Free to try.</p>
@@ -64,7 +64,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {["Upload photo", "AI matching", "Online retailers", "Free to try"].map((pill) => (
+          {["Upload photo", "Pick occasion", "Choose vibe", "Shop matches"].map((pill) => (
             <span
               key={pill}
               className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-zinc-400"
@@ -87,7 +87,7 @@ export default function LandingPage() {
             How it works
           </p>
           <h2 className="text-3xl font-bold tracking-tight leading-tight">
-            Three steps.
+            Five steps.
             <br />
             <span className="text-zinc-400">One better outfit.</span>
           </h2>
@@ -98,17 +98,27 @@ export default function LandingPage() {
             {
               step: "01",
               title: "Upload your item",
-              desc: "Add a clear photo of one clothing piece.",
+              desc: "Start with one clothing piece you already own.",
             },
             {
               step: "02",
-              title: "AI reads the style",
-              desc: "We detect the item, colour, and outfit direction.",
+              title: "Pick the context",
+              desc: "Choose where you are wearing it, like dinner, work, party, or travel.",
             },
             {
               step: "03",
+              title: "Choose the vibe",
+              desc: "Go safe, minimal, bold, or expensive-looking.",
+            },
+            {
+              step: "04",
+              title: "Pick budget",
+              desc: "Set your spend level so recommendations fit your price range.",
+            },
+            {
+              step: "05",
               title: "Shop matching pieces",
-              desc: "Get products that work around your uploaded item.",
+              desc: "Get products that work around your item and outfit direction.",
             },
           ].map((item) => (
             <div

@@ -6,6 +6,16 @@ import { getProductsForCategories } from "../../lib/products";
 
 type Budget = "affordable" | "mid" | "premium";
 
+type EventType =
+  | "casual-day"
+  | "dinner"
+  | "party"
+  | "work"
+  | "vacation"
+  | "date";
+
+type VibeType = "safe" | "minimal" | "bold" | "expensive-looking";
+
 type OutfitDirection = "casual clean" | "smart casual" | "evening polished";
 
 /** AI analysis from /api/analyze-item; fields optional so older responses stay valid. */
@@ -71,15 +81,75 @@ const SAMPLE_IMAGE = "/products/sample-black-trousers.webp";
 const SAMPLE_IMAGE_REMOTE =
   "https://image.hm.com/assets/hm/39/96/39966692dce4819fd2cb12b0f53e2edc41b69b40.jpg?imwidth=1260";
 
-const SAMPLE_ANALYSIS: AIAnalysis = {
-  itemType: "tailored trousers",
-  mainColor: "black",
-  style: "wide-leg, clean, smart-casual",
-  outfitDirection: "casual clean",
-  recommendedPieces: ["white t-shirt", "overshirt", "white sneakers"],
-  reason:
-    "Your black tailored trousers create a clean base. A white tee adds contrast, an overshirt keeps the outfit relaxed, and white trainers make it easy to wear day-to-day.",
-};
+function getSampleAnalysis(
+  eventType?: EventType | null,
+  vibeType?: VibeType | null,
+  _budget?: Budget | null
+): AIAnalysis {
+  const base: Pick<AIAnalysis, "itemType" | "mainColor" | "style"> = {
+    itemType: "tailored trousers",
+    mainColor: "black",
+    style: "wide-leg, clean, smart-casual",
+  };
+
+  if ((eventType === "dinner" || eventType === "date") && vibeType === "expensive-looking") {
+    return {
+      ...base,
+      outfitDirection: "evening polished",
+      recommendedPieces: ["oxford shirt", "blazer", "loafers"],
+      reason:
+        "Your black tailored trousers already create a polished base. A clean shirt, blazer, and loafers build a sharper dinner outfit that looks refined without feeling overdone.",
+    };
+  }
+
+  if ((eventType === "dinner" || eventType === "date") && vibeType === "minimal") {
+    return {
+      ...base,
+      outfitDirection: "smart casual",
+      recommendedPieces: ["oxford shirt", "loafers", "minimal accessory"],
+      reason:
+        "Your black tailored trousers give the outfit structure. A clean shirt and loafers keep it smart, while a minimal accessory adds a small finishing detail.",
+    };
+  }
+
+  if (eventType === "party" && vibeType === "bold") {
+    return {
+      ...base,
+      outfitDirection: "evening polished",
+      recommendedPieces: ["black t-shirt", "blazer", "chelsea boots"],
+      reason:
+        "Your black tailored trousers create a sharp base for a night out. A black tee, blazer, and dark shoes keep the look confident and more evening-ready.",
+    };
+  }
+
+  if (eventType === "work") {
+    return {
+      ...base,
+      outfitDirection: "smart casual",
+      recommendedPieces: ["oxford shirt", "blazer", "loafers"],
+      reason:
+        "Your black tailored trousers are already work-appropriate. A clean shirt, blazer, and smart shoes keep the outfit sharp, simple, and professional.",
+    };
+  }
+
+  if (eventType === "vacation") {
+    return {
+      ...base,
+      outfitDirection: "casual clean",
+      recommendedPieces: ["white t-shirt", "overshirt", "white sneakers"],
+      reason:
+        "Your black tailored trousers can still work casually. A white tee, light layer, and white sneakers make the outfit relaxed and travel-friendly.",
+    };
+  }
+
+  return {
+    ...base,
+    outfitDirection: "casual clean",
+    recommendedPieces: ["white t-shirt", "overshirt", "white sneakers"],
+    reason:
+      "Your black tailored trousers are a strong base for casual day wear. A white tee adds contrast, an overshirt keeps it relaxed, and white sneakers make it easy to wear.",
+  };
+}
 
 const OUTFITS: OutfitMap = {
   affordable: {
@@ -233,6 +303,110 @@ const BUDGET_LABELS: Record<Budget, string> = {
   premium: "Premium",
 };
 
+const EVENT_OPTIONS: {
+  value: EventType;
+  label: string;
+  sub: string;
+  accent: string;
+  dot: string;
+}[] = [
+  {
+    value: "casual-day",
+    label: "Casual day",
+    sub: "Easy everyday outfit.",
+    accent: "hover:border-stone-500/40 hover:bg-stone-900/30",
+    dot: "bg-stone-400",
+  },
+  {
+    value: "dinner",
+    label: "Dinner",
+    sub: "Clean, polished, not too much.",
+    accent: "hover:border-slate-500/40 hover:bg-slate-900/30",
+    dot: "bg-slate-400",
+  },
+  {
+    value: "party",
+    label: "Party",
+    sub: "Sharper, social, more standout.",
+    accent: "hover:border-fuchsia-600/40 hover:bg-fuchsia-950/20",
+    dot: "bg-fuchsia-400",
+  },
+  {
+    value: "work",
+    label: "Work",
+    sub: "Smart, clean, appropriate.",
+    accent: "hover:border-zinc-500/40 hover:bg-zinc-900/30",
+    dot: "bg-zinc-400",
+  },
+  {
+    value: "vacation",
+    label: "Vacation",
+    sub: "Relaxed, practical, still stylish.",
+    accent: "hover:border-cyan-500/40 hover:bg-cyan-950/20",
+    dot: "bg-cyan-400",
+  },
+  {
+    value: "date",
+    label: "Date",
+    sub: "Intentional, confident, balanced.",
+    accent: "hover:border-rose-500/40 hover:bg-rose-950/20",
+    dot: "bg-rose-400",
+  },
+];
+
+const VIBE_OPTIONS: {
+  value: VibeType;
+  label: string;
+  sub: string;
+  accent: string;
+  dot: string;
+}[] = [
+  {
+    value: "safe",
+    label: "Safe",
+    sub: "Reliable and easy to wear.",
+    accent: "hover:border-stone-500/40 hover:bg-stone-900/30",
+    dot: "bg-stone-400",
+  },
+  {
+    value: "minimal",
+    label: "Minimal",
+    sub: "Clean, simple, understated.",
+    accent: "hover:border-slate-500/40 hover:bg-slate-900/30",
+    dot: "bg-slate-400",
+  },
+  {
+    value: "bold",
+    label: "Bold",
+    sub: "More contrast and personality.",
+    accent: "hover:border-fuchsia-600/40 hover:bg-fuchsia-950/20",
+    dot: "bg-fuchsia-400",
+  },
+  {
+    value: "expensive-looking",
+    label: "Expensive-looking",
+    sub: "Polished without being loud.",
+    accent: "hover:border-amber-600/40 hover:bg-amber-950/20",
+    dot: "bg-amber-400",
+  },
+];
+
+const EVENT_LABELS: Record<EventType, string> = {
+  "casual-day": "Casual day",
+  dinner: "Dinner",
+  party: "Party",
+  work: "Work",
+  vacation: "Vacation",
+  date: "Date",
+};
+
+const VIBE_LABELS: Record<VibeType, string> = {
+  safe: "Safe",
+  minimal: "Minimal",
+  bold: "Bold",
+  "expensive-looking": "Expensive-looking",
+};
+
 function buildResultNote(budget: Budget) {
   if (budget === "affordable") {
     return "Matched around your item on an affordable budget.";
@@ -272,19 +446,19 @@ function BackButton({ onClick }: { onClick: () => void }) {
 }
 
 function ProgressBar({ step }: { step: number }) {
-  const percent = Math.round((step / 3) * 100);
+  const percent = Math.round((step / 4) * 100);
 
   return (
     <div className="mb-7">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
-          Step {step} of 3
+          Step {step} of 4
         </p>
         <p className="text-[11px] text-zinc-600">{percent}%</p>
       </div>
 
       <div className="flex items-center gap-1.5">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div
             key={s}
             className={`h-[3px] flex-1 rounded-full transition-all duration-500 ${
@@ -320,9 +494,14 @@ function ProductImage({
 
 export default function Home() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [isSampleItem, setIsSampleItem] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadConfirmed, setUploadConfirmed] = useState(false);
+  const [eventType, setEventType] = useState<EventType | null>(null);
+  const [vibeType, setVibeType] = useState<VibeType | null>(null);
   const [budget, setBudget] = useState<Budget | null>(null);
 
   const aiRecommendedItems = (aiAnalysis?.recommendedPieces ?? []).slice(0, 3);
@@ -338,7 +517,9 @@ export default function Home() {
       : budget
         ? OUTFITS[budget]
         : null;
-  const showResult = Boolean(uploadConfirmed && budget && uploadedImage && outfit);
+  const showResult = Boolean(
+    uploadConfirmed && uploadedImage && eventType && vibeType && budget && outfit
+  );
 
   useEffect(() => {
     return () => {
@@ -346,58 +527,106 @@ export default function Home() {
     };
   }, [uploadedImage]);
 
+  async function analyzeUploadedItem(
+    file: File,
+    selectedEventType: EventType | null,
+    selectedVibeType: VibeType | null
+  ) {
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("eventType", selectedEventType ?? "casual-day");
+    formData.append("vibeType", selectedVibeType ?? "minimal");
+
+    const res = await fetch("/api/analyze-item", {
+      method: "POST",
+      body: formData,
+    });
+
+    const text = await res.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("Server returned non-JSON:", text);
+      throw new Error("Server returned an invalid response.");
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to analyze image.");
+    }
+
+    console.log("AI RESULT:", data);
+    setAiAnalysis(data.analysis);
+  }
+
   async function handleUpload(file: File | undefined) {
     if (!file) return;
 
     if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
+    setUploadedFile(file);
     setUploadedFileName(file.name);
+    setIsSampleItem(false);
+    setUploadConfirmed(false);
+    setAiAnalysis(null);
+    setEventType(null);
+    setVibeType(null);
+    setBudget(null);
 
     const preview = URL.createObjectURL(file);
     setUploadedImage(preview);
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    try {
-      const res = await fetch("/api/analyze-item", {
-        method: "POST",
-        body: formData,
-      });
-
-      const text = await res.text();
-
-      let data;
-
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.error("Server returned non-JSON:", text);
-        throw new Error("Server returned an invalid response.");
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to analyze image.");
-      }
-
-      console.log("AI RESULT:", data);
-      setAiAnalysis(data.analysis);
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   function handleTrySample() {
     if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
     setUploadedImage(USE_LOCAL_SAMPLE_IMAGE ? SAMPLE_IMAGE : SAMPLE_IMAGE_REMOTE);
+    setUploadedFile(null);
     setUploadedFileName("Sample black trousers");
-    setAiAnalysis(SAMPLE_ANALYSIS);
+    setAiAnalysis(null);
+    setIsSampleItem(true);
+    setUploadConfirmed(true);
+    setEventType(null);
+    setVibeType(null);
+    setBudget(null);
+  }
+
+  async function handleBudgetSelect(nextBudget: Budget) {
+    if (isAnalyzing) return;
+
+    if (isSampleItem) {
+      setAiAnalysis(getSampleAnalysis(eventType, vibeType, nextBudget));
+      setBudget(nextBudget);
+      return;
+    }
+
+    if (!uploadedFile) {
+      setBudget(nextBudget);
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      await analyzeUploadedItem(uploadedFile, eventType, vibeType);
+      setBudget(nextBudget);
+    } catch (err) {
+      console.error(err);
+      setBudget(nextBudget);
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   function resetAll() {
     if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
     setUploadedImage(null);
+    setUploadedFile(null);
     setUploadedFileName(null);
+    setIsSampleItem(false);
+    setIsAnalyzing(false);
     setUploadConfirmed(false);
+    setEventType(null);
+    setVibeType(null);
     setBudget(null);
     setAiAnalysis(null);
   }
@@ -406,16 +635,22 @@ export default function Home() {
     ? 1
     : !uploadConfirmed
       ? 1
-      : !budget
+      : !eventType
         ? 2
-        : 3;
+        : !vibeType
+          ? 3
+          : !budget
+            ? 4
+            : 4;
 
   const selectedSummary = useMemo(
     () => ({
       upload: uploadedImage ? "Item uploaded" : null,
+      event: eventType ? EVENT_LABELS[eventType] : null,
+      vibe: vibeType ? VIBE_LABELS[vibeType] : null,
       budget: budget ? BUDGET_LABELS[budget] : null,
     }),
-    [budget, uploadedImage]
+    [budget, eventType, uploadedImage, vibeType]
   );
 
   const resultNote = budget ? buildResultNote(budget) : null;
@@ -444,16 +679,21 @@ export default function Home() {
           <div className="flex flex-wrap gap-2">
             <MiniPill>Upload item</MiniPill>
             <MiniPill>Online matches</MiniPill>
-            <MiniPill>3 steps</MiniPill>
+            <MiniPill>4 steps</MiniPill>
           </div>
         </div>
 
         <ProgressBar step={stepNumber} />
 
-        {(selectedSummary.budget || selectedSummary.upload) &&
+        {(selectedSummary.budget ||
+          selectedSummary.upload ||
+          selectedSummary.event ||
+          selectedSummary.vibe) &&
           !showResult && (
             <div className="mb-5 flex flex-wrap gap-2">
               {selectedSummary.upload && <MiniPill>{selectedSummary.upload}</MiniPill>}
+              {selectedSummary.event && <MiniPill>{selectedSummary.event}</MiniPill>}
+              {selectedSummary.vibe && <MiniPill>{selectedSummary.vibe}</MiniPill>}
               {selectedSummary.budget && <MiniPill>{selectedSummary.budget}</MiniPill>}
             </div>
           )}
@@ -462,7 +702,7 @@ export default function Home() {
           <section className="space-y-3">
             <div className="mb-5">
               <h2 className="text-2xl font-semibold tracking-tight">Upload your item.</h2>
-              <p className="mt-1.5 text-sm text-zinc-500">Step 1 of 3</p>
+              <p className="mt-1.5 text-sm text-zinc-500">Step 1 of 4</p>
             </div>
 
             <label className="group block cursor-pointer overflow-hidden rounded-[26px] border border-dashed border-white/[0.14] bg-white/[0.03] p-5 transition duration-200 hover:scale-[1.015] hover:border-white/25 hover:bg-white/[0.06]">
@@ -501,6 +741,16 @@ export default function Home() {
             >
               Try with sample item
             </button>
+
+            <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-4">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">Example match</p>
+              <p className="mt-2 text-sm font-medium text-zinc-200">
+                Black trousers → white tee + overshirt + white sneakers
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+                Choose an event and vibe to make the result more specific.
+              </p>
+            </div>
           </section>
         )}
 
@@ -508,7 +758,7 @@ export default function Home() {
           <section className="space-y-3">
             <div className="mb-5">
               <h2 className="text-2xl font-semibold tracking-tight">Confirm upload.</h2>
-              <p className="mt-1.5 text-sm text-zinc-500">Step 1 of 3</p>
+              <p className="mt-1.5 text-sm text-zinc-500">Step 1 of 4</p>
             </div>
 
             <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
@@ -568,20 +818,23 @@ export default function Home() {
           </section>
         )}
 
-        {uploadConfirmed && !budget && (
+        {uploadConfirmed && !eventType && (
           <section className="space-y-3">
             <div className="mb-5 flex items-start gap-4">
               <BackButton onClick={() => setUploadConfirmed(false)} />
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Pick budget.</h2>
-                <p className="mt-0.5 text-sm text-zinc-500">Step 2 of 3</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Where are you wearing it?</h2>
+                <p className="mt-0.5 text-sm text-zinc-500">
+                  Context helps the outfit feel less generic.
+                </p>
+                <p className="mt-1 text-sm text-zinc-500">Step 2 of 4</p>
               </div>
             </div>
 
-            {BUDGET_OPTIONS.map((opt) => (
+            {EVENT_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setBudget(opt.value)}
+                onClick={() => setEventType(opt.value)}
                 className={`group w-full rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-5 py-4 text-left transition duration-200 hover:scale-[1.025] active:scale-[0.99] ${opt.accent}`}
               >
                 <div className="flex items-center justify-between gap-4">
@@ -604,7 +857,94 @@ export default function Home() {
           </section>
         )}
 
-        {showResult && outfit && budget && uploadedImage && (
+        {uploadConfirmed && eventType && !vibeType && (
+          <section className="space-y-3">
+            <div className="mb-5 flex items-start gap-4">
+              <BackButton onClick={() => setEventType(null)} />
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">What vibe do you want?</h2>
+                <p className="mt-0.5 text-sm text-zinc-500">
+                  This guides the taste of the outfit.
+                </p>
+                <p className="mt-1 text-sm text-zinc-500">Step 3 of 4</p>
+              </div>
+            </div>
+
+            {VIBE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setVibeType(opt.value)}
+                className={`group w-full rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-5 py-4 text-left transition duration-200 hover:scale-[1.025] active:scale-[0.99] ${opt.accent}`}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-2 w-2 rounded-full ${opt.dot} opacity-70 group-hover:opacity-100`}
+                    />
+                    <div>
+                      <p className="text-base font-semibold text-white">{opt.label}</p>
+                      <p className="mt-0.5 text-sm text-zinc-500">{opt.sub}</p>
+                    </div>
+                  </div>
+
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 transition group-hover:text-zinc-400">
+                    Select →
+                  </span>
+                </div>
+              </button>
+            ))}
+          </section>
+        )}
+
+        {uploadConfirmed && eventType && vibeType && !budget && (
+          <section className="space-y-3">
+            <div className="mb-5 flex items-start gap-4">
+              <BackButton onClick={() => setVibeType(null)} />
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Pick budget.</h2>
+                <p className="mt-0.5 text-sm text-zinc-500">Step 4 of 4</p>
+              </div>
+            </div>
+
+            {isAnalyzing && (
+              <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">
+                  Analyzing your item...
+                </p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Building recommendations for your selected event and vibe.
+                </p>
+              </div>
+            )}
+
+            {BUDGET_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => handleBudgetSelect(opt.value)}
+                disabled={isAnalyzing}
+                className={`group w-full rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-5 py-4 text-left transition duration-200 hover:scale-[1.025] active:scale-[0.99] ${opt.accent}`}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-2 w-2 rounded-full ${opt.dot} opacity-70 group-hover:opacity-100`}
+                    />
+                    <div>
+                      <p className="text-base font-semibold text-white">{opt.label}</p>
+                      <p className="mt-0.5 text-sm text-zinc-500">{opt.sub}</p>
+                    </div>
+                  </div>
+
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 transition group-hover:text-zinc-400">
+                    {isAnalyzing ? "Analyzing..." : "Select →"}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </section>
+        )}
+
+        {showResult && outfit && budget && uploadedImage && eventType && vibeType && (
           <section>
             <div className="mb-4 flex items-center justify-between gap-3">
               <BackButton onClick={() => setBudget(null)} />
@@ -629,7 +969,7 @@ export default function Home() {
 
                 <div className="relative flex h-full flex-col justify-end p-6">
                   <p className="mb-1.5 text-[10px] uppercase tracking-[0.28em] text-white/50">
-                    Step 3 of 3
+                    Step 5 of 5
                   </p>
                   <h2 className="text-2xl font-bold leading-tight tracking-tight text-white">
                     {formatOutfitDirectionTitle(aiAnalysis?.outfitDirection) ??
@@ -641,8 +981,10 @@ export default function Home() {
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.06] px-5 py-3">
                 <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
-                  Budget preference
+                  Selections
                 </p>
+                <MiniPill>{EVENT_LABELS[eventType]}</MiniPill>
+                <MiniPill>{VIBE_LABELS[vibeType]}</MiniPill>
                 <MiniPill>{BUDGET_LABELS[budget]}</MiniPill>
               </div>
 

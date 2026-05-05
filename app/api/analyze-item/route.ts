@@ -27,6 +27,16 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const image = formData.get("image");
+    const rawEventType = formData.get("eventType");
+    const rawVibeType = formData.get("vibeType");
+    const eventType =
+      typeof rawEventType === "string" && rawEventType.trim().length > 0
+        ? rawEventType.trim()
+        : "casual-day";
+    const vibeType =
+      typeof rawVibeType === "string" && rawVibeType.trim().length > 0
+        ? rawVibeType.trim()
+        : "minimal";
 
     if (!image || !(image instanceof File)) {
       return NextResponse.json({ error: "No image" }, { status: 400 });
@@ -47,23 +57,48 @@ export async function POST(req: Request) {
               text: `
 Analyze this clothing item for a men's outfit matching app.
 
+The user uploaded one clothing item.
+They are dressing for:
+EVENT: ${eventType}
+They want the vibe:
+VIBE: ${vibeType}
+
 First, choose exactly ONE "outfitDirection" from these three strings only:
 - "casual clean"
 - "smart casual"
 - "evening polished"
 
-How to choose outfitDirection (vary naturally—do not default to the same direction every time):
-- If the uploaded item is already formal or tailored, do NOT always choose "evening polished". Prefer "smart casual" or "casual clean" when they fit the vibe.
-- For tailored trousers, black jeans, or other structured pieces, "casual clean" is allowed and often a strong choice.
-- Match the overall vibe of the piece, but introduce variety across different uploads so results feel fresh.
+Event meaning:
+- casual-day: everyday, easy, wearable
+- dinner: polished but not too formal
+- party: social, sharper, more personality
+- work: smart, clean, appropriate
+- vacation: relaxed, practical, stylish
+- date: intentional, confident, balanced
 
-The recommendedPieces array MUST align with the chosen outfitDirection. Examples of coherent sets (illustrative only):
-- casual clean: e.g. white t-shirt, overshirt, white sneakers
-- smart casual: e.g. oxford shirt, loafers, minimal accessory
-- evening polished: e.g. blazer, loafers, oxford shirt
+Vibe meaning:
+- safe: reliable, easy to wear, low risk
+- minimal: clean, simple, understated
+- bold: more contrast, stronger pieces, more personality
+- expensive-looking: polished, refined, premium-looking without being loud
+
+How to choose outfitDirection:
+- Return outfitDirection as exactly one of: "casual clean", "smart casual", "evening polished".
+- casual-day and vacation often lean "casual clean".
+- dinner, date, and work often lean "smart casual".
+- party and expensive-looking can lean "evening polished".
+- Do not force this mapping. Pick what best fits the uploaded item + event + vibe.
 
 The recommendedPieces array MUST only use these exact lowercase strings (no other values):
 ${ALLOWED_CATEGORIES}
+
+recommendedPieces must:
+- match the uploaded item
+- match the event
+- match the vibe
+- NOT be the same type of item as the uploaded item
+- include 3 pieces maximum
+- only use exact allowed category values
 
 Return ONLY valid JSON with this shape:
 {
@@ -75,11 +110,11 @@ Return ONLY valid JSON with this shape:
   "reason": ""
 }
 
-outfitDirection must be exactly one of: "casual clean", "smart casual", "evening polished".
-
-Include at most 3 items in recommendedPieces (never more than 3).
-Do not recommend the same category as the uploaded item (e.g. if the photo is a white t-shirt, omit "white t-shirt" from recommendedPieces).
-Keep "reason" short—one or two sentences on why these pieces complement the upload and fit the direction.
+Keep "reason" specific and short (1-2 sentences):
+- mention the uploaded item
+- mention the event
+- mention the vibe
+- explain why the recommended pieces work together
               `,
             },
             {
