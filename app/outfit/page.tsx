@@ -433,6 +433,42 @@ function formatOutfitDirectionTitle(direction?: string | null): string | null {
   return null;
 }
 
+function buildOutfitFormula(
+  aiAnalysis: AIAnalysis | null,
+  eventType: EventType | null,
+  vibeType: VibeType | null
+): string {
+  const direction = normalizeOutfitDirection(aiAnalysis?.outfitDirection);
+  const pieces = (aiAnalysis?.recommendedPieces ?? []).map((p) => p.toLowerCase());
+  const isSampleTrousers = (aiAnalysis?.itemType ?? "").toLowerCase().includes("tailored trousers");
+
+  if (isSampleTrousers && direction === "casual clean") {
+    return "Structured trousers with a clean tee, relaxed layer, and light shoes.";
+  }
+  if (isSampleTrousers && direction === "smart casual") {
+    return "Structured trousers with a clean shirt and smart shoes.";
+  }
+  if (isSampleTrousers && direction === "evening polished") {
+    return "A tailored base with a crisp shirt, polished layer, and refined shoes.";
+  }
+
+  if (direction === "evening polished") {
+    if (pieces.includes("chelsea boots")) {
+      return "A dark base with a sharp layer and confident finish.";
+    }
+    return "A structured base with a crisp shirt and polished shoes.";
+  }
+
+  if (direction === "smart casual") {
+    if (eventType === "work") return "A structured base with a clean shirt and smart shoes.";
+    return "A structured base with a crisp shirt and polished shoes.";
+  }
+
+  if (eventType === "vacation") return "An easy base with a practical layer and comfortable shoes.";
+  if (vibeType === "minimal") return "A clean base with a simple layer and quiet finish.";
+  return "A clean base with a relaxed layer and light shoes.";
+}
+
 function MiniPill({ children }: { children: React.ReactNode }) {
   return (
     <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-zinc-300">
@@ -661,6 +697,7 @@ export default function Home() {
   );
 
   const resultNote = budget ? buildResultNote(budget) : null;
+  const outfitFormula = buildOutfitFormula(aiAnalysis, eventType, vibeType);
   const allowedBudgets = getAllowedBudgets(vibeType);
 
   useEffect(() => {
@@ -744,10 +781,6 @@ export default function Home() {
             <p className="text-center text-xs text-zinc-500">
               Photos are analyzed for clothing only.
             </p>
-            <p className="text-center text-[11px] leading-relaxed text-zinc-600">
-              Your photo is only used to generate outfit suggestions.
-            </p>
-
             <button
               type="button"
               onClick={handleTrySample}
@@ -1023,6 +1056,13 @@ export default function Home() {
               </div>
 
               <div className="px-5 py-5">
+                <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
+                    The formula
+                  </p>
+                  <p className="mt-2.5 text-sm leading-relaxed text-zinc-200">{outfitFormula}</p>
+                </div>
+
                 <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
                   <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
                     Why this works

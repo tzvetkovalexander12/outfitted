@@ -100,6 +100,24 @@ recommendedPieces must:
 - include 3 pieces maximum
 - only use exact allowed category values
 
+Special hoodie/sweatshirt guidance:
+- If the uploaded item is a hoodie or sweatshirt and EVENT is "date", keep the outfit relaxed but sharpen the lower half.
+- For hoodie/sweatshirt + date, prefer "black jeans" or "tailored trousers" over "blue jeans".
+- For hoodie/sweatshirt + date, prefer clean sneakers, loafers, or chelsea boots depending on vibe and budget.
+- Avoid recommending "blue jeans" for hoodie/sweatshirt + date unless VIBE is "safe" and budget context is affordable.
+- Do not let hoodie/sweatshirt + date feel like a generic casual-day outfit.
+
+For hoodie/sweatshirt + date + minimal, recommendedPieces should usually resemble one of these mixes:
+- "black jeans" + "white sneakers" + "minimal accessory"
+- "tailored trousers" + "white sneakers" + "minimal accessory"
+- "overshirt" + "black jeans" + "white sneakers"
+
+For hoodie/sweatshirt + date + expensive-looking, recommendedPieces should usually resemble one of these mixes:
+- "tailored trousers" + "chelsea boots" + "minimal accessory"
+- "black jeans" + "chelsea boots" + "blazer" (only if layering is plausible with the hoodie)
+
+For hoodie/sweatshirt + casual-day, "blue jeans" is fine.
+
 Return ONLY valid JSON with this shape:
 {
   "itemType": "",
@@ -115,6 +133,21 @@ Keep "reason" specific and short (1-2 sentences):
 - mention the event
 - mention the vibe
 - explain why the recommended pieces work together
+- avoid generic color-only advice
+- sound like a concise stylist explanation
+
+If the uploaded item is a hoodie or sweatshirt and EVENT is "date", the reason should explicitly mention:
+- keeping the hoodie relaxed
+- sharpening the outfit for date context
+- avoiding a too-basic casual look
+
+Do not give generic advice like "these colors match". Explain silhouette, contrast, formality, occasion, and why the pieces work around the uploaded item.
+
+Bad example:
+"White matches black and creates a clean look."
+
+Good example:
+"Your black tailored trousers already create a sharp base for dinner. A clean shirt and blazer add polish, while loafers finish the outfit without making it feel overdone."
               `,
             },
             {
