@@ -4,6 +4,12 @@ import Link from "next/link";
 import { track } from "@vercel/analytics";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getProductsForCategories } from "../../lib/products";
+import {
+  getProductStylistNote,
+  getStylingContrastNote,
+  getStylistDirection,
+  getUpgradeMove,
+} from "../../lib/resultCopy";
 
 type Budget = "affordable" | "mid" | "premium";
 
@@ -557,100 +563,6 @@ function toCategoryLabel(rawCategory?: string): string | null {
   return "Styling piece";
 }
 
-function buildFallbackStylistNote({
-  category,
-  uploadedItemType,
-  uploadedItemColor,
-  eventType,
-  vibeType,
-}: {
-  category?: string;
-  uploadedItemType?: string;
-  uploadedItemColor?: string;
-  eventType: EventType;
-  vibeType: VibeType;
-}): string {
-  const item = uploadedItemType?.toLowerCase() || "uploaded piece";
-  const color = uploadedItemColor?.toLowerCase();
-  const isHoodieBase = item.includes("hoodie") || item.includes("sweatshirt");
-  const eventLabel = EVENT_LABELS[eventType].toLowerCase();
-  const vibeLabel = VIBE_LABELS[vibeType].toLowerCase();
-  const darkBase = color?.includes("black") || color?.includes("charcoal") || color?.includes("dark");
-  const baseText = darkBase ? "Works with the dark base instead of fighting it." : "";
-
-  if (category === "black jeans") {
-    if (isHoodieBase) {
-      return "Sharpens the hoodie while keeping the look relaxed-sharp. Cleaner than blue denim for this direction.";
-    }
-    return `Keeps the lower half cleaner for ${eventLabel} while staying easy to wear for a ${vibeLabel} vibe.`;
-  }
-  if (category === "tailored trousers") {
-    if (isHoodieBase) {
-      return "Gives the hoodie a sharper lower half without making the outfit feel fully formal.";
-    }
-    return `Adds structure around your ${item} so the outfit feels intentional for ${eventLabel}.`;
-  }
-  if (category === "chelsea boots") {
-    if (isHoodieBase) {
-      return "Adds polish to the hoodie while keeping the look relaxed-sharp, not corporate.";
-    }
-    return `Balances the ${item} with a smarter shoe so the ${vibeLabel} direction still looks intentional.`;
-  }
-  if (category === "overshirt") {
-    if (isHoodieBase) {
-      return "Adds structure and layering around the hoodie without making the outfit too dressed up.";
-    }
-    return `Adds a clean layer around your ${item} so the outfit feels more put-together for ${eventLabel}.`;
-  }
-  if (category === "blazer") {
-    if (isHoodieBase) {
-      return "Creates a relaxed-sharp contrast: the hoodie keeps it casual, the blazer adds shape.";
-    }
-    return `Adds shape around the ${item} so the outfit reads intentional instead of flat.`;
-  }
-  if (category === "white sneakers" || category === "black sneakers") {
-    if (isHoodieBase) {
-      return "Keeps the hoodie relaxed, but the clean sneaker shape makes the outfit feel intentional.";
-    }
-    return `Keeps the outfit wearable while still giving the ${eventLabel} look a cleaner finish.`;
-  }
-  if (category === "minimal accessory") {
-    return "Adds a small finishing detail without distracting from the main outfit.";
-  }
-
-  if (baseText) return baseText;
-  return `Chosen to support your ${item} for ${eventLabel} with a ${vibeLabel} finish.`;
-}
-
-function buildStylistNote({
-  item,
-  category,
-  uploadedItemType,
-  uploadedItemColor,
-  eventType,
-  vibeType,
-}: {
-  item: OutfitItem;
-  category?: string;
-  uploadedItemType?: string;
-  uploadedItemColor?: string;
-  eventType: EventType;
-  vibeType: VibeType;
-}): string {
-  const fallback = buildFallbackStylistNote({
-    category,
-    uploadedItemType,
-    uploadedItemColor,
-    eventType,
-    vibeType,
-  });
-
-  const provided = item.note?.trim();
-  if (!provided) return fallback;
-
-  return `${fallback} ${provided}`;
-}
-
 export default function Home() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -819,6 +731,34 @@ export default function Home() {
   const resultNote = budget ? buildResultNote(budget) : null;
   const outfitFormula = buildOutfitFormula(aiAnalysis, eventType, vibeType);
   const allowedBudgets = getAllowedBudgets(vibeType);
+  const selectedCategories = (outfit?.items ?? []).map(
+    (item, i) => item.category ?? aiRecommendedItems[i]
+  );
+  const stylistDirection = getStylistDirection({
+    uploadedItemType: aiAnalysis?.itemType,
+    uploadedItemColor: aiAnalysis?.mainColor,
+    occasion: eventType ?? undefined,
+    vibe: vibeType ?? undefined,
+    budget: budget ?? undefined,
+    selectedCategories,
+    aiReason: aiAnalysis?.reason,
+  });
+  const stylingContrastNote = getStylingContrastNote({
+    uploadedItemType: aiAnalysis?.itemType,
+    uploadedItemColor: aiAnalysis?.mainColor,
+    occasion: eventType ?? undefined,
+    vibe: vibeType ?? undefined,
+    budget: budget ?? undefined,
+    selectedCategories,
+  });
+  const upgradeMove = getUpgradeMove({
+    uploadedItemType: aiAnalysis?.itemType,
+    uploadedItemColor: aiAnalysis?.mainColor,
+    occasion: eventType ?? undefined,
+    vibe: vibeType ?? undefined,
+    budget: budget ?? undefined,
+    selectedCategories,
+  });
 
   useEffect(() => {
     if (budget && !allowedBudgets.includes(budget)) {
@@ -869,8 +809,11 @@ export default function Home() {
               <h1 className="text-[2.1rem] font-bold leading-[1.02] tracking-tight sm:text-[2.5rem]">
                 Upload one item.
                 <br />
-                <span className="text-zinc-400">Match the rest.</span>
+                <span className="text-zinc-400">Build the fit around it.</span>
               </h1>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-zinc-500">
+                Upload your piece, choose the occasion, vibe, and budget, then get a styled outfit built around it.
+              </p>
             </div>
 
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-base shadow-lg shadow-black/20">
@@ -930,7 +873,7 @@ export default function Home() {
             </label>
 
             <p className="text-center text-xs text-zinc-500">
-              Photos are analyzed for clothing only.
+              Photos are only used to generate your outfit recommendation.
             </p>
             <p className="text-center text-xs leading-relaxed text-zinc-500">
               No account needed. Try a sample first if you don&apos;t want to upload yet.
@@ -1216,48 +1159,33 @@ export default function Home() {
               <div className="px-5 py-5">
                 <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
                   <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
-                    The formula
+                    Stylist direction
                   </p>
-                  <p className="mt-2.5 text-sm leading-relaxed text-zinc-200">{outfitFormula}</p>
+                  <p className="mt-2.5 text-sm leading-relaxed text-zinc-200">{stylistDirection}</p>
                 </div>
 
-                <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
-                    Why this works
-                  </p>
-                  <p className="mt-2.5 text-sm leading-relaxed text-zinc-300">
-                    {aiAnalysis?.reason?.trim() ||
-                      "Matched around your uploaded item based on style, colour, and outfit direction."}
-                  </p>
-                  {aiAnalysis && (
-                    <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
-                      <span className="uppercase tracking-[0.16em] text-zinc-600">
-                        Direction:{" "}
-                      </span>
-                      <span className="font-medium text-zinc-300">
-                        {formatOutfitDirectionLabel(resolvedOutfitDirection)}
-                      </span>
+                {stylingContrastNote && (
+                  <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
+                      Why this direction?
                     </p>
-                  )}
-                </div>
+                    <p className="mt-2.5 text-sm leading-relaxed text-zinc-300">{stylingContrastNote}</p>
+                  </div>
+                )}
 
                 <p className="mb-5 text-[11px] leading-relaxed text-zinc-600">
-                  Products are selected based on the AI outfit direction and your budget preference.
-                </p>
-                <p className="mb-5 -mt-2 text-[11px] leading-relaxed text-zinc-600">
-                  Some product links may be{" "}
-                  <Link href="/affiliate-disclosure" className="underline decoration-zinc-700/70 hover:text-zinc-400">
-                    affiliate links
-                  </Link>
-                  . This helps keep FitAround free.
+                  {outfitFormula}
                 </p>
 
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
-                    Recommended pieces
+                    Pieces that complete the look
                   </p>
                   <p className="text-[11px] text-zinc-600">{outfit.items.length} items</p>
                 </div>
+                <p className="mb-4 text-xs leading-relaxed text-zinc-500">
+                  These pieces are chosen to support the styling direction, not just match the color.
+                </p>
 
                 <div className="space-y-2.5">
                   {outfit.items.map((item: OutfitItem, i: number) => (
@@ -1295,13 +1223,17 @@ export default function Home() {
                               Why this works
                             </p>
                             <p className="mt-1.5 text-sm leading-relaxed text-zinc-200">
-                              {buildStylistNote({
-                                item,
+                              {getProductStylistNote({
+                                productName: item.label,
+                                brand: item.brand,
                                 category: item.category ?? aiRecommendedItems[i],
                                 uploadedItemType: aiAnalysis?.itemType,
                                 uploadedItemColor: aiAnalysis?.mainColor,
-                                eventType,
-                                vibeType,
+                                occasion: eventType,
+                                vibe: vibeType,
+                                budget,
+                                selectedCategories,
+                                productNote: item.note,
                               })}
                             </p>
                           </div>
@@ -1330,6 +1262,29 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+
+                {upgradeMove && (
+                  <div className="mt-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">Upgrade move</p>
+                    <p className="mt-2.5 text-sm leading-relaxed text-zinc-300">{upgradeMove}</p>
+                    {aiAnalysis && (
+                      <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
+                        <span className="uppercase tracking-[0.16em] text-zinc-600">Direction: </span>
+                        <span className="font-medium text-zinc-300">
+                          {formatOutfitDirectionLabel(resolvedOutfitDirection)}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <p className="mt-5 text-[11px] leading-relaxed text-zinc-600">
+                  Some product links may be{" "}
+                  <Link href="/affiliate-disclosure" className="underline decoration-zinc-700/70 hover:text-zinc-400">
+                    affiliate links
+                  </Link>
+                  . This helps keep FitAround free.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 border-t border-white/[0.06] px-5 py-5">

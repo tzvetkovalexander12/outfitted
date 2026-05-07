@@ -1,0 +1,165 @@
+export type StylingContext = {
+  uploadedItemType?: string;
+  uploadedItemColor?: string;
+  occasion?: string;
+  vibe?: string;
+  budget?: string;
+  selectedCategories?: string[];
+  aiReason?: string;
+};
+
+export type ProductNoteContext = StylingContext & {
+  productName?: string;
+  brand?: string;
+  category?: string;
+  role?: string;
+  productNote?: string;
+};
+
+function normalize(value?: string): string {
+  return (value ?? "").toLowerCase().trim();
+}
+
+function isHoodieItem(itemType?: string): boolean {
+  const item = normalize(itemType);
+  return item.includes("hoodie") || item.includes("sweatshirt");
+}
+
+export function getStylistDirection(context: StylingContext): string {
+  const provided = context.aiReason?.trim();
+  if (provided && provided.length >= 24) return provided;
+
+  const itemType = normalize(context.uploadedItemType) || "uploaded piece";
+  const occasion = normalize(context.occasion);
+  const vibe = normalize(context.vibe);
+  const hoodieBase = isHoodieItem(context.uploadedItemType);
+
+  if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
+    return "Your hoodie is relaxed by default, so this outfit sharpens the lower half instead of forcing it to look formal. The goal is clean, intentional, and date-ready without losing the casual feel.";
+  }
+  if (hoodieBase && (occasion === "casual-day" || vibe === "safe" || vibe === "minimal")) {
+    return "This keeps the hoodie easy and wearable, then adds cleaner structure around it. The result feels relaxed, intentional, and more considered than a basic hoodie combo.";
+  }
+  if (vibe === "expensive-looking") {
+    return `This leans into a cleaner, sharper version of your ${itemType}. The outfit uses better shape and restraint so it feels polished without looking overdone.`;
+  }
+  if (vibe === "bold") {
+    return `Your ${itemType} sets the base, then one stronger piece drives the look. The rest is kept clean so the outfit feels confident, styled, and easy to wear.`;
+  }
+
+  return `Your ${itemType} sets the base, and the rest of the outfit is built to balance it for ${occasion || "your selected context"}. The final look stays wearable while feeling intentional and put together.`;
+}
+
+export function getStylingContrastNote(context: StylingContext): string | null {
+  const occasion = normalize(context.occasion);
+  const vibe = normalize(context.vibe);
+  const hoodieBase = isHoodieItem(context.uploadedItemType);
+
+  if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
+    return "Blue jeans would work, but they can read too basic here. A darker or sharper lower half keeps the hoodie casual while making the whole look more intentional.";
+  }
+  if (hoodieBase && vibe === "expensive-looking") {
+    return "The point is not to make the hoodie formal. The point is to contrast it with cleaner pieces so the outfit feels relaxed-sharp.";
+  }
+  if (vibe === "minimal") {
+    return "Minimal does not mean plain. The outfit relies on cleaner shapes and fewer distractions.";
+  }
+  if (vibe === "bold") {
+    return "Bold works best when one or two pieces lead the outfit. The rest should support the statement instead of competing.";
+  }
+
+  return null;
+}
+
+export function getUpgradeMove(context: StylingContext): string | null {
+  const occasion = normalize(context.occasion);
+  const vibe = normalize(context.vibe);
+  const hoodieBase = isHoodieItem(context.uploadedItemType);
+
+  if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
+    return "Swap clean sneakers for Chelsea boots if you want the outfit to feel more date-night ready.";
+  }
+  if (hoodieBase && (occasion === "casual-day" || vibe === "safe" || vibe === "minimal")) {
+    return "Add an overshirt if you want the hoodie to feel more layered and intentional.";
+  }
+  if (vibe === "minimal") {
+    return "Keep accessories small. One clean watch or simple chain is enough.";
+  }
+  if (vibe === "expensive-looking") {
+    return "Choose cleaner textures and sharper shoes before adding loud pieces.";
+  }
+  if (occasion === "party" || vibe === "bold") {
+    return "Let one piece carry the attention, then keep the rest clean.";
+  }
+
+  return "Use one cleaner shoe or layer upgrade to make the look feel sharper without overcomplicating it.";
+}
+
+function getCategoryRoleNote(context: ProductNoteContext): string | null {
+  const category = normalize(context.category);
+  const hoodieBase = isHoodieItem(context.uploadedItemType);
+  const occasion = normalize(context.occasion);
+  const vibe = normalize(context.vibe);
+  const affordable = normalize(context.budget) === "affordable";
+
+  if (category === "black jeans") {
+    if (hoodieBase && occasion !== "casual-day") {
+      return "Cleaner than blue denim here. They keep the hoodie casual while making the outfit sharper.";
+    }
+    return "Sharpens the lower half while keeping the outfit easy to wear.";
+  }
+  if (category === "blue jeans") {
+    if (hoodieBase && occasion !== "casual-day" && !(vibe === "safe" && affordable)) {
+      return "Blue denim keeps this more familiar, but it is softer than the sharper options for this direction.";
+    }
+    return "Keeps the look casual and familiar. Best when the outfit direction is safe or relaxed.";
+  }
+  if (category === "tailored trousers") {
+    if (hoodieBase) return "They give the hoodie a cleaner lower half, so the outfit feels intentional instead of lazy.";
+    return "Adds a cleaner shape so the outfit feels more intentional without becoming too formal.";
+  }
+  if (category === "white sneakers") {
+    if (hoodieBase) return "Keeps the hoodie relaxed, but the clean sneaker shape makes the outfit feel intentional.";
+    return "Keeps the outfit relaxed, but the clean shape makes it feel more considered.";
+  }
+  if (category === "black sneakers") {
+    return "Keeps the outfit grounded and easy while supporting a darker base.";
+  }
+  if (category === "chelsea boots") {
+    if (hoodieBase) return "They add polish to the hoodie without turning the outfit corporate.";
+    return "Adds polish without making the outfit feel corporate.";
+  }
+  if (category === "loafers") {
+    return "Sharpens the outfit with a smarter finish while staying lighter than boots.";
+  }
+  if (category === "overshirt") {
+    if (hoodieBase) return "This adds structure around the hoodie while keeping the outfit relaxed and easy.";
+    return "Adds structure and layering without making the outfit feel overdressed.";
+  }
+  if (category === "blazer") {
+    if (hoodieBase) return "This works as relaxed-sharp contrast: the hoodie keeps it casual, the blazer adds shape.";
+    return "Adds shape and contrast. Best when the outfit is meant to feel relaxed-sharp.";
+  }
+  if (category === "minimal accessory") {
+    return "Finishes the outfit quietly without pulling attention away from the main piece.";
+  }
+  if (category === "oxford shirt") {
+    return "Adds a cleaner layer that makes the outfit feel sharper without looking forced.";
+  }
+  if (category === "white t-shirt" || category === "black t-shirt") {
+    return "Keeps the base simple so the rest of the outfit can carry the direction.";
+  }
+
+  return null;
+}
+
+export function getProductStylistNote(context: ProductNoteContext): string {
+  const specific = context.productNote?.trim();
+  if (specific) return specific;
+
+  const roleNote = getCategoryRoleNote(context);
+  if (roleNote) return roleNote;
+
+  const itemType = normalize(context.uploadedItemType) || "main piece";
+  return `Chosen to support the styling direction around your ${itemType}, so the outfit feels intentional instead of random.`;
+}

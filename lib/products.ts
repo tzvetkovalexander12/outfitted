@@ -1,3 +1,5 @@
+import { searchProducts } from "./productSearch";
+
 export type ProductCategory =
   | "white t-shirt"
   | "black t-shirt"
@@ -16,20 +18,48 @@ export type ProductCategory =
   | "black jeans";
 
 export type Budget = "affordable" | "mid" | "premium";
+export type BudgetTier = Budget;
+export type ProductSource = "manual" | "feed" | "api" | "scrape";
+export type ProductRole = "top" | "bottom" | "shoes" | "layer" | "outerwear" | "accessory";
 
 export interface Product {
   id: string;
+  name?: string;
   category: ProductCategory;
+  role?: ProductRole;
   brand: string;
   label: string;
+  imageUrl?: string;
+  productUrl?: string;
   price: string;
+  currency?: string;
+  budgetTier?: BudgetTier;
   budget: Budget;
+  colors?: string[];
+  occasions?: string[];
+  vibes?: string[];
+  styleTags?: string[];
+  source?: ProductSource;
   region: "Europe";
   url: string;
   image: string;
   note: string;
   isAffiliate: boolean;
 }
+
+export type ProductRecord = Product & {
+  name: string;
+  role: ProductRole;
+  imageUrl: string;
+  productUrl: string;
+  currency: string;
+  budgetTier: BudgetTier;
+  colors: string[];
+  occasions: string[];
+  vibes: string[];
+  styleTags: string[];
+  source: ProductSource;
+};
 
 /** Normalized strings must match these keys exactly for lookups. */
 const PRODUCT_CATEGORY_KEYS = new Set<string>([
@@ -90,6 +120,75 @@ function isBeltAccessory(product: Product): boolean {
   const label = product.label.toLowerCase();
   const url = product.url.toLowerCase();
   return label.includes("belt") || url.includes("belt");
+}
+
+function inferRole(category: ProductCategory): ProductRole {
+  if (category === "white t-shirt" || category === "black t-shirt" || category === "oxford shirt") {
+    return "top";
+  }
+  if (category === "chinos" || category === "tailored trousers" || category === "blue jeans" || category === "black jeans") {
+    return "bottom";
+  }
+  if (category === "white sneakers" || category === "black sneakers" || category === "loafers" || category === "chelsea boots") {
+    return "shoes";
+  }
+  if (category === "overshirt" || category === "blazer") return "layer";
+  if (category === "minimal accessory") return "accessory";
+  return "outerwear";
+}
+
+function inferColors(product: Product): string[] {
+  const text = `${product.label} ${product.note}`.toLowerCase();
+  const palette = ["black", "white", "beige", "blue", "brown", "grey", "gray", "tan", "stone"];
+  const colors = palette.filter((color) => text.includes(color));
+  return colors.length > 0 ? colors : ["neutral"];
+}
+
+function inferOccasions(category: ProductCategory): string[] {
+  if (category === "blazer" || category === "loafers" || category === "chelsea boots") {
+    return ["date", "dinner", "party", "work"];
+  }
+  if (category === "overshirt" || category === "hoodie") return ["casual-day", "vacation", "date"];
+  if (category === "tailored trousers" || category === "oxford shirt") return ["date", "dinner", "work"];
+  return ["casual-day", "vacation", "date", "dinner"];
+}
+
+function inferVibes(category: ProductCategory): string[] {
+  if (category === "blazer" || category === "chelsea boots" || category === "tailored trousers") {
+    return ["bold", "expensive-looking", "minimal"];
+  }
+  if (category === "minimal accessory") return ["minimal", "bold", "expensive-looking", "safe"];
+  if (category === "blue jeans" || category === "hoodie") return ["safe", "minimal"];
+  return ["safe", "minimal", "bold"];
+}
+
+function inferStyleTags(product: Product): string[] {
+  const tags = new Set<string>([
+    product.category,
+    product.brand.toLowerCase(),
+    ...inferColors(product),
+  ]);
+  if (product.category === "blazer" || product.category === "tailored trousers") tags.add("sharper");
+  if (product.category === "overshirt" || product.category === "hoodie") tags.add("relaxed");
+  if (product.category === "minimal accessory") tags.add("finishing");
+  return Array.from(tags);
+}
+
+export function normalizeProduct(product: Product): ProductRecord {
+  return {
+    ...product,
+    name: product.name ?? product.label,
+    role: product.role ?? inferRole(product.category),
+    imageUrl: product.imageUrl ?? product.image,
+    productUrl: product.productUrl ?? product.url,
+    currency: product.currency ?? "EUR",
+    budgetTier: product.budgetTier ?? product.budget,
+    colors: product.colors ?? inferColors(product),
+    occasions: product.occasions ?? inferOccasions(product.category),
+    vibes: product.vibes ?? inferVibes(product.category),
+    styleTags: product.styleTags ?? inferStyleTags(product),
+    source: product.source ?? "manual",
+  };
 }
 
 /**
@@ -899,11 +998,13 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+export const NORMALIZED_PRODUCTS: ProductRecord[] = PRODUCTS.map(normalizeProduct);
+
 export function getProductsForCategories(
   categories: string[],
   budget: Budget
-): Product[] {
-  const selected: Product[] = [];
+): ProductRecord[] {
+  const selected: ProductRecord[] = [];
   const seen = new Set<string>();
 
   for (const rawCategory of categories) {
@@ -913,54 +1014,43 @@ export function getProductsForCategories(
     const category = toProductCategory(normalized);
     if (!category) continue;
 
-    const budgetMatches = PRODUCTS.filter(
-      (product) =>
-        product.category === category &&
-        product.budget === budget &&
-        !seen.has(product.id)
-    );
+    // TODO: Replace local search with database/feed search when live product ingestion lands.
+    const searchResults = searchProducts(
+      {
+        category,
+        budgetTier: budget,
+        limit: 8,
+      },
+      NORMALIZED_PRODUCTS
+    ).filter((product) => !seen.has(product.id));
 
-    const pool =
-      budgetMatches.length > 0
-        ? budgetMatches
-        : PRODUCTS.filter(
-            (product) =>
-              product.category === category && !seen.has(product.id)
-          );
-
-    const selectionPool =
+    const prioritized =
       category === "oxford shirt"
-        ? pool.filter(isStrongOxfordShirt).length > 0
-          ? pool.filter(isStrongOxfordShirt)
-          : pool
+        ? searchResults.filter(isStrongOxfordShirt).length > 0
+          ? searchResults.filter(isStrongOxfordShirt)
+          : searchResults
         : category === "chelsea boots"
-          ? pool.filter(isRealChelseaBoot).length > 0
-            ? pool.filter(isRealChelseaBoot)
-            : pool
+          ? searchResults.filter(isRealChelseaBoot).length > 0
+            ? searchResults.filter(isRealChelseaBoot)
+            : searchResults
           : category === "minimal accessory"
-            ? pool.filter((product) => !isBeltAccessory(product)).length > 0
-              ? pool.filter((product) => !isBeltAccessory(product))
-              : pool
-        : pool;
+            ? searchResults.filter((product) => !isBeltAccessory(product)).length > 0
+              ? searchResults.filter((product) => !isBeltAccessory(product))
+              : searchResults
+            : searchResults;
 
-    let next: Product | undefined;
+    let next: ProductRecord | undefined;
 
     if (category === "minimal accessory") {
-      const nonBeltAccessories = selectionPool.filter(
-        (product) => !isBeltAccessory(product)
-      );
+      const nonBeltAccessories = prioritized.filter((product) => !isBeltAccessory(product));
+      next =
+        lastSelectedAccessoryWasBelt && nonBeltAccessories.length > 0
+          ? pickRandomProduct(nonBeltAccessories)
+          : pickRandomProduct(prioritized);
 
-      if (lastSelectedAccessoryWasBelt && nonBeltAccessories.length > 0) {
-        next = pickRandomProduct(nonBeltAccessories);
-      } else {
-        next = pickRandomProduct(selectionPool);
-      }
-
-      if (next) {
-        lastSelectedAccessoryWasBelt = isBeltAccessory(next);
-      }
+      if (next) lastSelectedAccessoryWasBelt = isBeltAccessory(next);
     } else {
-      next = pickRandomProduct(selectionPool);
+      next = pickRandomProduct(prioritized);
     }
 
     if (!next) continue;

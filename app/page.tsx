@@ -34,7 +34,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-sm">
-          Choose the occasion, vibe, and budget - then get outfit pieces that actually make sense with what
+          Choose the occasion, vibe, and budget — then get outfit pieces that actually make sense with what
           you&apos;re wearing.
         </p>
 
