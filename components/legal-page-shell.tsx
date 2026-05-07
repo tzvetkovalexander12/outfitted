@@ -14,13 +14,13 @@ export function LegalPageShell({ title, children }: LegalPageShellProps) {
           href="/"
           className="text-sm font-semibold uppercase tracking-widest text-white transition hover:text-zinc-300"
         >
-          Outfitted
+          FitAround
         </Link>
         <Link
           href="/outfit"
           className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs uppercase tracking-widest text-zinc-300 transition hover:scale-[1.02] hover:border-white/20 hover:text-white"
         >
-          Try Outfitted
+          Try FitAround
         </Link>
       </nav>
 

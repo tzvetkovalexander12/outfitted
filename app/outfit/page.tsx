@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { track } from "@vercel/analytics";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getProductsForCategories } from "../../lib/products";
 
 type Budget = "affordable" | "mid" | "premium";
@@ -50,6 +51,7 @@ function formatOutfitDirectionLabel(direction: OutfitDirection): string {
 }
 
 interface OutfitItem {
+  id?: string;
   label: string;
   url: string;
   price: string;
@@ -661,6 +663,7 @@ export default function Home() {
   const [vibeType, setVibeType] = useState<VibeType | null>(null);
   const [budget, setBudget] = useState<Budget | null>(null);
   const [analyzingMessageIndex, setAnalyzingMessageIndex] = useState(0);
+  const hasTrackedResultRef = useRef(false);
 
   const aiRecommendedItems = (aiAnalysis?.recommendedPieces ?? []).slice(0, 3);
   const resolvedOutfitDirection = normalizeOutfitDirection(
@@ -734,6 +737,7 @@ export default function Home() {
 
     const preview = URL.createObjectURL(file);
     setUploadedImage(preview);
+    track("upload_completed", { source: "user_upload" });
   }
 
   function handleTrySample() {
@@ -747,6 +751,7 @@ export default function Home() {
     setEventType(null);
     setVibeType(null);
     setBudget(null);
+    track("try_sample_clicked", { source: "upload_step" });
   }
 
   async function handleBudgetSelect(nextBudget: Budget) {
@@ -834,6 +839,24 @@ export default function Home() {
     return () => window.clearInterval(intervalId);
   }, [isAnalyzing]);
 
+  useEffect(() => {
+    if (!showResult || !outfit || !eventType || !vibeType || !budget) {
+      hasTrackedResultRef.current = false;
+      return;
+    }
+
+    if (hasTrackedResultRef.current) return;
+
+    track("result_generated", {
+      occasion: eventType,
+      vibe: vibeType,
+      budget,
+      uploadedItemType: aiAnalysis?.itemType ?? "unknown",
+      productCount: outfit.items.length,
+    });
+    hasTrackedResultRef.current = true;
+  }, [aiAnalysis?.itemType, budget, eventType, outfit, showResult, vibeType]);
+
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(to_bottom,#0a0a0c,#111113_40%,#0a0a0c)] text-white">
       <div className="mx-auto max-w-md px-4 pb-20 pt-6 sm:px-5 sm:pt-8">
@@ -841,7 +864,7 @@ export default function Home() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="mb-2 text-[10px] uppercase tracking-[0.28em] text-zinc-600">
-                Outfitted
+                FitAround
               </p>
               <h1 className="text-[2.1rem] font-bold leading-[1.02] tracking-tight sm:text-[2.5rem]">
                 Upload one item.
@@ -909,13 +932,19 @@ export default function Home() {
             <p className="text-center text-xs text-zinc-500">
               Photos are analyzed for clothing only.
             </p>
+            <p className="text-center text-xs leading-relaxed text-zinc-500">
+              No account needed. Try a sample first if you don&apos;t want to upload yet.
+            </p>
             <button
               type="button"
               onClick={handleTrySample}
-              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+              className="w-full rounded-[16px] border border-white/20 bg-white/[0.07] px-4 py-3.5 text-sm font-semibold text-zinc-100 transition hover:border-white/30 hover:bg-white/[0.1] hover:text-white"
             >
-              Try with sample item
+              Try a sample item
             </button>
+            <p className="-mt-1 text-center text-xs text-zinc-500">
+              Not ready to upload? See an example result first.
+            </p>
 
             <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-4">
               <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">Example match</p>
@@ -1220,7 +1249,7 @@ export default function Home() {
                   <Link href="/affiliate-disclosure" className="underline decoration-zinc-700/70 hover:text-zinc-400">
                     affiliate links
                   </Link>
-                  . This helps keep Outfitted free.
+                  . This helps keep FitAround free.
                 </p>
 
                 <div className="mb-3 flex items-center justify-between">
@@ -1261,11 +1290,11 @@ export default function Home() {
                             </p>
                           )}
 
-                          <div className="mt-3 rounded-[14px] border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
-                            <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-600">
+                          <div className="mt-3 rounded-[14px] border border-white/[0.1] bg-white/[0.05] px-3 py-3">
+                            <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
                               Why this works
                             </p>
-                            <p className="mt-1.5 text-xs leading-relaxed text-zinc-300">
+                            <p className="mt-1.5 text-sm leading-relaxed text-zinc-200">
                               {buildStylistNote({
                                 item,
                                 category: item.category ?? aiRecommendedItems[i],
@@ -1281,6 +1310,17 @@ export default function Home() {
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
+                            onClick={() =>
+                              track("shop_piece_clicked", {
+                                productId: item.id ?? "unknown",
+                                productName: item.label,
+                                brand: item.brand ?? "unknown",
+                                category: item.category ?? aiRecommendedItems[i] ?? "unknown",
+                                occasion: eventType,
+                                vibe: vibeType,
+                                budget,
+                              })
+                            }
                             className="mt-3 inline-flex rounded-full border border-white/10 bg-white/[0.02] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
                           >
                             Shop piece →
@@ -1342,6 +1382,7 @@ export default function Home() {
             Contact
           </Link>
         </nav>
+        <p className="mt-4 text-center text-[11px] text-zinc-700">© 2026 FitAround</p>
       </footer>
     </main>
   );

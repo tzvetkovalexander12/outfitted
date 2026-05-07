@@ -9,13 +9,13 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="mx-auto max-w-md px-5 pt-6 pb-2 flex items-center justify-between">
         <span className="text-sm font-semibold tracking-widest uppercase text-white">
-          Outfitted
+          FitAround
         </span>
         <Link
           href="/outfit"
           className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs uppercase tracking-widest text-zinc-300 transition hover:scale-105 hover:border-white/20 hover:text-white"
         >
-          Get started
+          Build my outfit
         </Link>
       </nav>
 
@@ -30,11 +30,12 @@ export default function LandingPage() {
         <h1 className="text-[3rem] font-bold leading-[1.02] tracking-tight mb-6">
           Upload one item.
           <br />
-          <span className="text-zinc-400">Match the rest.</span>
+          <span className="text-zinc-400">Build the fit around it.</span>
         </h1>
 
-        <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-xs">
-          Upload a clothing item, choose the occasion and vibe, and get pieces that match.
+        <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-sm">
+          Choose the occasion, vibe, and budget - then get outfit pieces that actually make sense with what
+          you&apos;re wearing.
         </p>
 
         <p className="text-sm text-zinc-500 mb-3 max-w-xs">
@@ -52,15 +53,15 @@ export default function LandingPage() {
             href="/outfit"
             className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-widest text-black transition hover:scale-[1.02] hover:bg-zinc-100 active:scale-[0.99]"
           >
-            Upload my item
+            Build my outfit
           </Link>
 
-          <a
-            href="#how-it-works"
+          <Link
+            href="/outfit"
             className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm uppercase tracking-widest text-zinc-400 transition hover:scale-[1.02] hover:border-white/20 hover:text-white"
           >
-            How it works
-          </a>
+            Try a sample item
+          </Link>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -147,10 +148,11 @@ export default function LandingPage() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600">
-              Outfitted
+              FitAround
             </span>
             <p className="mt-1 text-xs text-zinc-700">AI outfit matching, simplified.</p>
             <p className="mt-2 text-[11px] text-zinc-700">Free to use · Affiliate-supported</p>
+            <p className="mt-2 text-[11px] text-zinc-700">© 2026 FitAround</p>
           </div>
           <nav
             className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.14em] text-zinc-500"

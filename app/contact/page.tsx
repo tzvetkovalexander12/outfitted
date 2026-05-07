@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { LegalPageShell } from "../../components/legal-page-shell";
 
 export const metadata: Metadata = {
-  title: "Contact | Outfitted",
-  description: "Contact Outfitted for questions, feedback, partnerships, or affiliate enquiries.",
+  title: "Contact | FitAround",
+  description: "Contact FitAround for questions, feedback, partnerships, or affiliate enquiries.",
 };
 
 export default function ContactPage() {
@@ -21,7 +21,7 @@ export default function ContactPage() {
         </a>
       </p>
       <p className="text-zinc-500">
-        We are currently improving Outfitted and welcome feedback from users and retail partners.
+        We are currently improving FitAround and welcome feedback from users and retail partners.
       </p>
     </LegalPageShell>
   );
