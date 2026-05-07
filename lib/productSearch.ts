@@ -1,4 +1,4 @@
-import type { BudgetTier, ProductCategory, ProductRecord, ProductRole } from "./products";
+import type { BudgetTier, Product, ProductCategory, ProductRole } from "./products";
 
 export type ProductSearchRequirement = {
   role?: ProductRole;
@@ -27,8 +27,8 @@ function shuffle<T>(items: T[]): T[] {
  */
 export function searchProducts(
   requirements: ProductSearchRequirement,
-  products: ProductRecord[]
-): ProductRecord[] {
+  products: Product[]
+): Product[] {
   const limit = requirements.limit ?? 6;
   const excluded = new Set((requirements.excludeCategories ?? []).map((x) => x.toLowerCase()));
 

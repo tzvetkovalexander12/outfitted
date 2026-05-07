@@ -22,44 +22,62 @@ export type BudgetTier = Budget;
 export type ProductSource = "manual" | "feed" | "api" | "scrape";
 export type ProductRole = "top" | "bottom" | "shoes" | "layer" | "outerwear" | "accessory";
 
-export interface Product {
+/**
+ * Raw catalog or feed row before normalization.
+ * Use `normalizeProduct` before recommendation/search logic.
+ */
+export interface ExternalProduct {
   id: string;
-  name?: string;
   category: ProductCategory;
-  role?: ProductRole;
   brand: string;
   label: string;
+  price: string;
+  budget: Budget;
+  region: "Europe";
+  url: string;
+  image: string;
+  note: string;
+  isAffiliate: boolean;
+  name?: string;
+  role?: ProductRole;
   imageUrl?: string;
   productUrl?: string;
-  price: string;
   currency?: string;
   budgetTier?: BudgetTier;
-  budget: Budget;
   colors?: string[];
   occasions?: string[];
   vibes?: string[];
   styleTags?: string[];
   source?: ProductSource;
+}
+
+/**
+ * Normalized product for search and recommendations. Core merchandising fields are always set.
+ */
+export interface Product {
+  id: string;
+  name: string;
+  category: ProductCategory;
+  role: ProductRole;
+  brand: string;
+  label: string;
+  imageUrl: string;
+  productUrl: string;
+  price: string;
+  currency: string;
+  budgetTier: BudgetTier;
+  budget: Budget;
+  colors: string[];
+  occasions: string[];
+  vibes: string[];
+  styleTags: string[];
+  source: ProductSource;
   region: "Europe";
   url: string;
   image: string;
   note: string;
   isAffiliate: boolean;
 }
-
-export type ProductRecord = Product & {
-  name: string;
-  role: ProductRole;
-  imageUrl: string;
-  productUrl: string;
-  currency: string;
-  budgetTier: BudgetTier;
-  colors: string[];
-  occasions: string[];
-  vibes: string[];
-  styleTags: string[];
-  source: ProductSource;
-};
 
 /** Normalized strings must match these keys exactly for lookups. */
 const PRODUCT_CATEGORY_KEYS = new Set<string>([
@@ -89,7 +107,7 @@ function toProductCategory(normalized: string): ProductCategory | null {
   return normalized as ProductCategory;
 }
 
-function pickRandomProduct(products: Product[]): Product | undefined {
+function pickRandomProduct<T extends Product>(products: readonly T[]): T | undefined {
   if (products.length === 0) return undefined;
   const index = Math.floor(Math.random() * products.length);
   return products[index];
@@ -137,7 +155,7 @@ function inferRole(category: ProductCategory): ProductRole {
   return "outerwear";
 }
 
-function inferColors(product: Product): string[] {
+function inferColors(product: ExternalProduct): string[] {
   const text = `${product.label} ${product.note}`.toLowerCase();
   const palette = ["black", "white", "beige", "blue", "brown", "grey", "gray", "tan", "stone"];
   const colors = palette.filter((color) => text.includes(color));
@@ -162,7 +180,7 @@ function inferVibes(category: ProductCategory): string[] {
   return ["safe", "minimal", "bold"];
 }
 
-function inferStyleTags(product: Product): string[] {
+function inferStyleTags(product: ExternalProduct): string[] {
   const tags = new Set<string>([
     product.category,
     product.brand.toLowerCase(),
@@ -174,20 +192,30 @@ function inferStyleTags(product: Product): string[] {
   return Array.from(tags);
 }
 
-export function normalizeProduct(product: Product): ProductRecord {
+export function normalizeProduct(external: ExternalProduct): Product {
   return {
-    ...product,
-    name: product.name ?? product.label,
-    role: product.role ?? inferRole(product.category),
-    imageUrl: product.imageUrl ?? product.image,
-    productUrl: product.productUrl ?? product.url,
-    currency: product.currency ?? "EUR",
-    budgetTier: product.budgetTier ?? product.budget,
-    colors: product.colors ?? inferColors(product),
-    occasions: product.occasions ?? inferOccasions(product.category),
-    vibes: product.vibes ?? inferVibes(product.category),
-    styleTags: product.styleTags ?? inferStyleTags(product),
-    source: product.source ?? "manual",
+    id: external.id,
+    category: external.category,
+    brand: external.brand,
+    label: external.label,
+    price: external.price,
+    budget: external.budget,
+    region: external.region,
+    url: external.url,
+    image: external.image,
+    note: external.note,
+    isAffiliate: external.isAffiliate,
+    name: external.name ?? external.label,
+    role: external.role ?? inferRole(external.category),
+    imageUrl: external.imageUrl ?? external.image,
+    productUrl: external.productUrl ?? external.url,
+    currency: external.currency ?? "EUR",
+    budgetTier: external.budgetTier ?? external.budget,
+    colors: external.colors ?? inferColors(external),
+    occasions: external.occasions ?? inferOccasions(external.category),
+    vibes: external.vibes ?? inferVibes(external.category),
+    styleTags: external.styleTags ?? inferStyleTags(external),
+    source: external.source ?? "manual",
   };
 }
 
@@ -197,7 +225,7 @@ export function normalizeProduct(product: Product): ProductRecord {
  */
 let lastSelectedAccessoryWasBelt = false;
 
-export const PRODUCTS: Product[] = [
+export const PRODUCTS: ExternalProduct[] = [
   // WHITE T-SHIRT
   {
     id: "zara-white-tshirt-001",
@@ -998,13 +1026,13 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-export const NORMALIZED_PRODUCTS: ProductRecord[] = PRODUCTS.map(normalizeProduct);
+export const NORMALIZED_PRODUCTS: Product[] = PRODUCTS.map(normalizeProduct);
 
 export function getProductsForCategories(
   categories: string[],
   budget: Budget
-): ProductRecord[] {
-  const selected: ProductRecord[] = [];
+): Product[] {
+  const selected: Product[] = [];
   const seen = new Set<string>();
 
   for (const rawCategory of categories) {
@@ -1039,7 +1067,7 @@ export function getProductsForCategories(
               : searchResults
             : searchResults;
 
-    let next: ProductRecord | undefined;
+    let next: Product | undefined;
 
     if (category === "minimal accessory") {
       const nonBeltAccessories = prioritized.filter((product) => !isBeltAccessory(product));
