@@ -1,0 +1,4 @@
+# Replace the contact address before deployment if this mailbox is not actively monitored.
+Contact: mailto:hello@outfitted.app
+Preferred-Languages: en
+Canonical: https://outfittedmvp.vercel.app/.well-known/security.txt

@@ -101,22 +101,56 @@ recommendedPieces must:
 - only use exact allowed category values
 
 Special hoodie/sweatshirt guidance:
-- If the uploaded item is a hoodie or sweatshirt and EVENT is "date", keep the outfit relaxed but sharpen the lower half.
-- For hoodie/sweatshirt + date, prefer "black jeans" or "tailored trousers" over "blue jeans".
-- For hoodie/sweatshirt + date, prefer clean sneakers, loafers, or chelsea boots depending on vibe and budget.
-- Avoid recommending "blue jeans" for hoodie/sweatshirt + date unless VIBE is "safe" and budget context is affordable.
-- Do not let hoodie/sweatshirt + date feel like a generic casual-day outfit.
+- If the uploaded item is a hoodie or sweatshirt, treat it as a casual base.
+- Build around that base by doing at least one of:
+  1) keep it relaxed but cleaner,
+  2) sharpen the lower half,
+  3) add one intentional layer/accessory.
+- Never make hoodie/sweatshirt results feel like a random formal outfit.
+- Never recommend "hoodie" in recommendedPieces when the uploaded item is a hoodie/sweatshirt.
 
-For hoodie/sweatshirt + date + minimal, recommendedPieces should usually resemble one of these mixes:
-- "black jeans" + "white sneakers" + "minimal accessory"
-- "tailored trousers" + "white sneakers" + "minimal accessory"
-- "overshirt" + "black jeans" + "white sneakers"
+Hoodie/sweatshirt + date general rule:
+- The look should feel relaxed but intentional, not like basic casual-day.
+- Avoid "blue jeans" unless VIBE is "safe" and affordability is important.
+- Prefer "black jeans" or "tailored trousers" for the lower half.
+- Prefer "white sneakers", "black sneakers", "chelsea boots", or "minimal accessory" based on vibe.
+- Do not overuse belts as the default third item.
 
-For hoodie/sweatshirt + date + expensive-looking, recommendedPieces should usually resemble one of these mixes:
-- "tailored trousers" + "chelsea boots" + "minimal accessory"
-- "black jeans" + "chelsea boots" + "blazer" (only if layering is plausible with the hoodie)
+Hoodie + overshirt rule:
+- Hoodie + "overshirt" is usually good for casual-day, vacation, safe, and minimal.
 
-For hoodie/sweatshirt + casual-day, "blue jeans" is fine.
+Hoodie + blazer rule:
+- Only recommend "blazer" with hoodie when EVENT is "date", "party", or "dinner" AND VIBE is "bold" or "expensive-looking".
+- If you use a blazer with hoodie, treat blazer as a relaxed sharp layer.
+- Avoid formal suit styling with bulky hoodies.
+
+Hoodie/sweatshirt + date vibe-specific patterns:
+- safe:
+  - usually: "black jeans" + ("white sneakers" or "black sneakers") + "minimal accessory"
+  - safe should feel easy, wearable, low-risk, and cleaner than casual-day.
+- minimal:
+  - usually: ("black jeans" or "tailored trousers") + "white sneakers" + "minimal accessory"
+  - minimal should feel clean, simple, tonal, and not over-styled.
+- bold:
+  - usually: "black jeans" + "chelsea boots" + ("blazer" or "minimal accessory")
+  - bold should add stronger silhouette or contrast, not just trousers + belt.
+- expensive-looking:
+  - usually: "tailored trousers" + "chelsea boots" + ("minimal accessory" or "blazer")
+  - should feel tonal, polished, refined.
+  - prefer black chelsea boots with a black hoodie unless the outfit is clearly warm/neutral.
+  - avoid linen-looking tailored trousers with a black hoodie unless the context is vacation/summer.
+
+Vibe differentiation rule:
+- For same uploaded item + same event + same budget, outputs across vibes must be clearly different.
+- For hoodie + date + mid-range, keep this differentiation:
+  - safe: black jeans + white sneakers + minimal accessory
+  - minimal: tailored trousers or black jeans + white sneakers + minimal accessory
+  - bold: black jeans + chelsea boots + blazer or minimal accessory
+  - expensive-looking: tailored trousers + chelsea boots + blazer or minimal accessory
+
+Minimal accessory guidance:
+- "minimal accessory" can be belt, necklace/bracelet, ring, or sunglasses.
+- Do not default to belt repeatedly when a stronger clothing category would better differentiate the outfit.
 
 Return ONLY valid JSON with this shape:
 {
@@ -137,8 +171,9 @@ Keep "reason" specific and short (1-2 sentences):
 - sound like a concise stylist explanation
 
 If the uploaded item is a hoodie or sweatshirt and EVENT is "date", the reason should explicitly mention:
-- keeping the hoodie relaxed
-- sharpening the outfit for date context
+- the hoodie keeps a relaxed base
+- which piece(s) sharpen or clean up the outfit for date context
+- how this supports the selected vibe
 - avoiding a too-basic casual look
 
 Do not give generic advice like "these colors match". Explain silhouette, contrast, formality, occasion, and why the pieces work around the uploaded item.

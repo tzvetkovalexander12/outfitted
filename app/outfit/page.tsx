@@ -56,6 +56,7 @@ interface OutfitItem {
   image: string;
   note?: string;
   brand?: string;
+  category?: string;
 }
 
 interface Outfit {
@@ -407,6 +408,14 @@ const VIBE_LABELS: Record<VibeType, string> = {
   "expensive-looking": "Expensive-looking",
 };
 
+const ANALYZING_MESSAGES = [
+  "Reading your item...",
+  "Detecting colour and shape...",
+  "Matching occasion and vibe...",
+  "Finding pieces that work...",
+  "Building your outfit...",
+] as const;
+
 function getAllowedBudgets(vibeType: VibeType | null): Budget[] {
   if (vibeType === "expensive-looking" || vibeType === "bold") {
     return ["mid", "premium"];
@@ -524,15 +533,120 @@ function ProductImage({
   accent: string;
 }) {
   return (
-    <div className={`relative h-28 w-24 shrink-0 overflow-hidden bg-gradient-to-br ${accent}`}>
+    <div className={`relative h-32 w-24 shrink-0 overflow-hidden bg-gradient-to-br ${accent}`}>
       <div className="absolute inset-0 bg-black/10" />
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+        className="h-full w-full object-contain p-1.5 transition duration-300 group-hover:scale-105"
       />
     </div>
   );
+}
+
+function toCategoryLabel(rawCategory?: string): string | null {
+  if (!rawCategory) return null;
+  if (rawCategory === "minimal accessory") return "Finishing detail";
+  if (rawCategory === "tailored trousers") return "Sharper lower half";
+  if (rawCategory === "black jeans" || rawCategory === "blue jeans") return "Lower half anchor";
+  if (rawCategory === "chelsea boots" || rawCategory === "loafers") return "Polish piece";
+  if (rawCategory === "white sneakers" || rawCategory === "black sneakers") return "Clean footwear";
+  if (rawCategory === "overshirt" || rawCategory === "blazer") return "Layering piece";
+  return "Styling piece";
+}
+
+function buildFallbackStylistNote({
+  category,
+  uploadedItemType,
+  uploadedItemColor,
+  eventType,
+  vibeType,
+}: {
+  category?: string;
+  uploadedItemType?: string;
+  uploadedItemColor?: string;
+  eventType: EventType;
+  vibeType: VibeType;
+}): string {
+  const item = uploadedItemType?.toLowerCase() || "uploaded piece";
+  const color = uploadedItemColor?.toLowerCase();
+  const isHoodieBase = item.includes("hoodie") || item.includes("sweatshirt");
+  const eventLabel = EVENT_LABELS[eventType].toLowerCase();
+  const vibeLabel = VIBE_LABELS[vibeType].toLowerCase();
+  const darkBase = color?.includes("black") || color?.includes("charcoal") || color?.includes("dark");
+  const baseText = darkBase ? "Works with the dark base instead of fighting it." : "";
+
+  if (category === "black jeans") {
+    if (isHoodieBase) {
+      return "Sharpens the hoodie while keeping the look relaxed-sharp. Cleaner than blue denim for this direction.";
+    }
+    return `Keeps the lower half cleaner for ${eventLabel} while staying easy to wear for a ${vibeLabel} vibe.`;
+  }
+  if (category === "tailored trousers") {
+    if (isHoodieBase) {
+      return "Gives the hoodie a sharper lower half without making the outfit feel fully formal.";
+    }
+    return `Adds structure around your ${item} so the outfit feels intentional for ${eventLabel}.`;
+  }
+  if (category === "chelsea boots") {
+    if (isHoodieBase) {
+      return "Adds polish to the hoodie while keeping the look relaxed-sharp, not corporate.";
+    }
+    return `Balances the ${item} with a smarter shoe so the ${vibeLabel} direction still looks intentional.`;
+  }
+  if (category === "overshirt") {
+    if (isHoodieBase) {
+      return "Adds structure and layering around the hoodie without making the outfit too dressed up.";
+    }
+    return `Adds a clean layer around your ${item} so the outfit feels more put-together for ${eventLabel}.`;
+  }
+  if (category === "blazer") {
+    if (isHoodieBase) {
+      return "Creates a relaxed-sharp contrast: the hoodie keeps it casual, the blazer adds shape.";
+    }
+    return `Adds shape around the ${item} so the outfit reads intentional instead of flat.`;
+  }
+  if (category === "white sneakers" || category === "black sneakers") {
+    if (isHoodieBase) {
+      return "Keeps the hoodie relaxed, but the clean sneaker shape makes the outfit feel intentional.";
+    }
+    return `Keeps the outfit wearable while still giving the ${eventLabel} look a cleaner finish.`;
+  }
+  if (category === "minimal accessory") {
+    return "Adds a small finishing detail without distracting from the main outfit.";
+  }
+
+  if (baseText) return baseText;
+  return `Chosen to support your ${item} for ${eventLabel} with a ${vibeLabel} finish.`;
+}
+
+function buildStylistNote({
+  item,
+  category,
+  uploadedItemType,
+  uploadedItemColor,
+  eventType,
+  vibeType,
+}: {
+  item: OutfitItem;
+  category?: string;
+  uploadedItemType?: string;
+  uploadedItemColor?: string;
+  eventType: EventType;
+  vibeType: VibeType;
+}): string {
+  const fallback = buildFallbackStylistNote({
+    category,
+    uploadedItemType,
+    uploadedItemColor,
+    eventType,
+    vibeType,
+  });
+
+  const provided = item.note?.trim();
+  if (!provided) return fallback;
+
+  return `${fallback} ${provided}`;
 }
 
 export default function Home() {
@@ -546,6 +660,7 @@ export default function Home() {
   const [eventType, setEventType] = useState<EventType | null>(null);
   const [vibeType, setVibeType] = useState<VibeType | null>(null);
   const [budget, setBudget] = useState<Budget | null>(null);
+  const [analyzingMessageIndex, setAnalyzingMessageIndex] = useState(0);
 
   const aiRecommendedItems = (aiAnalysis?.recommendedPieces ?? []).slice(0, 3);
   const resolvedOutfitDirection = normalizeOutfitDirection(
@@ -705,6 +820,19 @@ export default function Home() {
       setBudget(null);
     }
   }, [allowedBudgets, budget]);
+
+  useEffect(() => {
+    if (!isAnalyzing) {
+      setAnalyzingMessageIndex(0);
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setAnalyzingMessageIndex((prev) => (prev + 1) % ANALYZING_MESSAGES.length);
+    }, 1200);
+
+    return () => window.clearInterval(intervalId);
+  }, [isAnalyzing]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(to_bottom,#0a0a0c,#111113_40%,#0a0a0c)] text-white">
@@ -954,12 +1082,13 @@ export default function Home() {
             </div>
 
             {isAnalyzing && (
-              <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">
-                  Analyzing your item...
+              <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-4 py-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <span className="h-2 w-2 rounded-full bg-white/80 animate-pulse" />
+                  {ANALYZING_MESSAGES[analyzingMessageIndex]}
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Building recommendations for your selected event and vibe.
+                <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+                  Usually takes a few seconds.
                 </p>
               </div>
             )}
@@ -1086,6 +1215,13 @@ export default function Home() {
                 <p className="mb-5 text-[11px] leading-relaxed text-zinc-600">
                   Products are selected based on the AI outfit direction and your budget preference.
                 </p>
+                <p className="mb-5 -mt-2 text-[11px] leading-relaxed text-zinc-600">
+                  Some product links may be{" "}
+                  <Link href="/affiliate-disclosure" className="underline decoration-zinc-700/70 hover:text-zinc-400">
+                    affiliate links
+                  </Link>
+                  . This helps keep Outfitted free.
+                </p>
 
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
@@ -1108,29 +1244,44 @@ export default function Home() {
                         />
 
                         <div className="flex-1 p-4">
-                          <div>
+                          <div className="flex items-start justify-between gap-3">
                             <div>
                               {item.brand && (
                                 <p className="mb-0.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">
                                   {item.brand}
                                 </p>
                               )}
-
                               <p className="text-sm leading-snug text-zinc-100">{item.label}</p>
                             </div>
                           </div>
 
-                          {item.note && (
-                            <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
-                              {item.note}
+                          {toCategoryLabel(item.category ?? aiRecommendedItems[i]) && (
+                            <p className="mt-2 inline-flex rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                              {toCategoryLabel(item.category ?? aiRecommendedItems[i])}
                             </p>
                           )}
+
+                          <div className="mt-3 rounded-[14px] border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
+                            <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-600">
+                              Why this works
+                            </p>
+                            <p className="mt-1.5 text-xs leading-relaxed text-zinc-300">
+                              {buildStylistNote({
+                                item,
+                                category: item.category ?? aiRecommendedItems[i],
+                                uploadedItemType: aiAnalysis?.itemType,
+                                uploadedItemColor: aiAnalysis?.mainColor,
+                                eventType,
+                                vibeType,
+                              })}
+                            </p>
+                          </div>
 
                           <a
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-3 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                            className="mt-3 inline-flex rounded-full border border-white/10 bg-white/[0.02] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
                           >
                             Shop piece →
                           </a>

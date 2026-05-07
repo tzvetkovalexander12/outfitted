@@ -85,6 +85,19 @@ function isRealChelseaBoot(product: Product): boolean {
   return label.includes("chelsea") || url.includes("chelsea");
 }
 
+function isBeltAccessory(product: Product): boolean {
+  if (product.category !== "minimal accessory") return false;
+  const label = product.label.toLowerCase();
+  const url = product.url.toLowerCase();
+  return label.includes("belt") || url.includes("belt");
+}
+
+/**
+ * Keeps accessory picks varied across consecutive results in one session.
+ * We only remember whether the previous selected accessory was a belt.
+ */
+let lastSelectedAccessoryWasBelt = false;
+
 export const PRODUCTS: Product[] = [
   // WHITE T-SHIRT
   {
@@ -924,9 +937,32 @@ export function getProductsForCategories(
           ? pool.filter(isRealChelseaBoot).length > 0
             ? pool.filter(isRealChelseaBoot)
             : pool
+          : category === "minimal accessory"
+            ? pool.filter((product) => !isBeltAccessory(product)).length > 0
+              ? pool.filter((product) => !isBeltAccessory(product))
+              : pool
         : pool;
 
-    const next = pickRandomProduct(selectionPool);
+    let next: Product | undefined;
+
+    if (category === "minimal accessory") {
+      const nonBeltAccessories = selectionPool.filter(
+        (product) => !isBeltAccessory(product)
+      );
+
+      if (lastSelectedAccessoryWasBelt && nonBeltAccessories.length > 0) {
+        next = pickRandomProduct(nonBeltAccessories);
+      } else {
+        next = pickRandomProduct(selectionPool);
+      }
+
+      if (next) {
+        lastSelectedAccessoryWasBelt = isBeltAccessory(next);
+      }
+    } else {
+      next = pickRandomProduct(selectionPool);
+    }
+
     if (!next) continue;
 
     selected.push(next);
