@@ -37,8 +37,14 @@ export function getStylistDirection(context: StylingContext): string {
   if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
     return "Your hoodie is relaxed by default, so this outfit sharpens the lower half instead of forcing it to look formal. The goal is clean, intentional, and date-ready without losing the casual feel.";
   }
-  if (hoodieBase && (occasion === "casual-day" || vibe === "safe" || vibe === "minimal")) {
+  if (
+    hoodieBase &&
+    (occasion === "casual-day" || occasion === "vacation" || vibe === "safe" || vibe === "minimal")
+  ) {
     return "This keeps the hoodie easy and wearable, then adds cleaner structure around it. The result feels relaxed, intentional, and more considered than a basic hoodie combo.";
+  }
+  if (occasion === "vacation") {
+    return "This leans relaxed and breathable — comfort-first pieces that still read considered when you are away from home.";
   }
   if (vibe === "expensive-looking") {
     return `This leans into a cleaner, sharper version of your ${itemType}. The outfit uses better shape and restraint so it feels polished without looking overdone.`;
@@ -66,6 +72,9 @@ export function getStylingContrastNote(context: StylingContext): string | null {
   }
   if (vibe === "bold") {
     return "Bold works best when one or two pieces lead the outfit. The rest should support the statement instead of competing.";
+  }
+  if (occasion === "vacation") {
+    return "Vacation calls for relaxed structure and easy layers — pieces that feel breathable and low-effort without looking careless.";
   }
 
   return null;
@@ -161,5 +170,5 @@ export function getProductStylistNote(context: ProductNoteContext): string {
   if (roleNote) return roleNote;
 
   const itemType = normalize(context.uploadedItemType) || "main piece";
-  return `Chosen to support the styling direction around your ${itemType}, so the outfit feels intentional instead of random.`;
+  return `Plays a clear role in the full look so your ${itemType} stays the focus and the rest supports proportion and polish.`;
 }
