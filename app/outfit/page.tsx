@@ -312,6 +312,13 @@ const BUDGET_LABELS: Record<Budget, string> = {
   premium: "Premium",
 };
 
+// TODO:
+// Future real-life constraints to test after validation:
+// - weather
+// - dress code
+// - comfort level
+// - already-owned shoes/bottoms
+// - before-buying use case
 const EVENT_OPTIONS: {
   value: EventType;
   label: string;
@@ -433,12 +440,12 @@ function getAllowedBudgets(vibeType: VibeType | null): Budget[] {
 
 function buildResultNote(budget: Budget) {
   if (budget === "affordable") {
-    return "Matched around your item on an affordable budget.";
+    return "Built around your item and where you're wearing it — tuned to an affordable budget.";
   }
   if (budget === "mid") {
-    return "Matched around your item on a mid-range budget.";
+    return "Built around your item and where you're wearing it — tuned to a mid-range budget.";
   }
-  return "Matched around your item on a premium budget.";
+  return "Built around your item and where you're wearing it — tuned to a premium budget.";
 }
 
 /** Title override when AI returns `outfitDirection`; falls back to budget-based title. */
@@ -865,7 +872,7 @@ export default function Home() {
                 <span className="text-zinc-400">Build the fit around it.</span>
               </h1>
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-zinc-500">
-                Upload your piece, choose the occasion, vibe, and budget, then get a styled outfit built around it.
+                Start with a piece you own or want to buy, then tell FitAround where you need to wear it.
               </p>
             </div>
 
@@ -1025,7 +1032,7 @@ export default function Home() {
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight">Where are you wearing it?</h2>
                 <p className="mt-0.5 text-sm text-zinc-500">
-                  Context helps the outfit feel less generic.
+                  Pick the situation so the outfit feels right for real life, not just good in theory.
                 </p>
                 <p className="mt-1 text-sm text-zinc-500">Step 2 of 4</p>
               </div>
@@ -1247,7 +1254,7 @@ export default function Home() {
                   <p className="text-[11px] text-zinc-600">{outfit.items.length} items</p>
                   </div>
                   <p className="mb-5 text-xs leading-relaxed text-zinc-500">
-                    These pieces support the styling direction, not just the color.
+                    Styled for your occasion, vibe, and budget — picked to work in real life, not just on a moodboard.
                   </p>
                 </div>
 

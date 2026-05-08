@@ -34,12 +34,11 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-sm">
-          Choose the occasion, vibe, and budget — then get outfit pieces that actually make sense with what
-          you&apos;re wearing.
+          Have a piece you need to wear this week? Upload it, choose the situation, and get a styled outfit built around it.
         </p>
 
         <p className="text-sm text-zinc-500 mb-3 max-w-xs">
-          Built to make outfit decisions faster, sharper, and less generic.
+          Built for real-life styling decisions, not just generic outfit ideas.
         </p>
 
         <p className="text-sm text-zinc-500 mb-10 max-w-xs">No signup needed. Free to try.</p>
@@ -94,23 +93,23 @@ export default function LandingPage() {
           {[
             {
               step: "01",
-              title: "Upload one item or try a sample",
-              desc: "Start with one clothing piece you own, or use a sample item first.",
+              title: "Upload one item",
+              desc: "Start with something you own or want to buy.",
             },
             {
               step: "02",
-              title: "Choose occasion",
-              desc: "Choose where you are wearing it, like dinner, work, party, or travel.",
+              title: "Pick the situation",
+              desc: "Tell us where you need to wear it.",
             },
             {
               step: "03",
-              title: "Choose vibe",
-              desc: "Go safe, minimal, bold, or expensive-looking.",
+              title: "Choose the vibe",
+              desc: "Safe, minimal, bold, or expensive-looking.",
             },
             {
               step: "04",
-              title: "Choose budget",
-              desc: "Set your spend level so recommendations fit your price range.",
+              title: "Set your budget",
+              desc: "Keep recommendations realistic.",
             },
           ].map((item) => (
             <div
@@ -138,9 +137,9 @@ export default function LandingPage() {
               Result
             </span>
             <div>
-              <p className="mb-1 text-base font-semibold text-white">Your styled result</p>
+              <p className="mb-1 text-base font-semibold text-white">Get a styled result</p>
               <p className="text-sm leading-relaxed text-zinc-400">
-                Get a complete outfit direction with stylist notes and pieces that complete the look.
+                See the direction, why it works, and pieces that complete the look.
               </p>
             </div>
           </div>
