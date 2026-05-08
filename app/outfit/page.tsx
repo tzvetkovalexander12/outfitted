@@ -578,6 +578,16 @@ function toCategoryLabel(rawCategory?: string): string | null {
 }
 
 export default function Home() {
+  const isDev = process.env.NODE_ENV === "development";
+  const devLog = (label: string, durationMs?: number) => {
+    if (!isDev) return;
+    if (typeof durationMs === "number") {
+      console.log(`[outfit] ${label}: ${durationMs}ms`);
+      return;
+    }
+    console.log(`[outfit] ${label}`);
+  };
+
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
@@ -590,6 +600,9 @@ export default function Home() {
   const [budget, setBudget] = useState<Budget | null>(null);
   const [analyzingMessageIndex, setAnalyzingMessageIndex] = useState(0);
   const hasTrackedResultRef = useRef(false);
+  const analyzeStartRef = useRef<number | null>(null);
+  const budgetSelectStartRef = useRef<number | null>(null);
+  const hasLoggedResultRenderRef = useRef(false);
 
   const aiRecommendedItems = (aiAnalysis?.recommendedPieces ?? []).slice(0, 3);
   const resolvedOutfitDirection = normalizeOutfitDirection(
@@ -619,15 +632,21 @@ export default function Home() {
     selectedEventType: EventType | null,
     selectedVibeType: VibeType | null
   ) {
+    const analyzeStart = Date.now();
+    analyzeStartRef.current = analyzeStart;
+    devLog("analyzeUploadedItem started");
+
     const formData = new FormData();
     formData.append("image", file);
     formData.append("eventType", selectedEventType ?? "casual-day");
     formData.append("vibeType", selectedVibeType ?? "minimal");
 
+    const apiRequestStart = Date.now();
     const res = await fetch("/api/analyze-item", {
       method: "POST",
       body: formData,
     });
+    devLog("API response received", Date.now() - apiRequestStart);
 
     const text = await res.text();
 
@@ -644,8 +663,8 @@ export default function Home() {
       throw new Error(data.error || "Failed to analyze image.");
     }
 
-    console.log("AI RESULT:", data);
     setAiAnalysis(data.analysis);
+    devLog("result state set (aiAnalysis)", Date.now() - analyzeStart);
   }
 
   async function handleUpload(file: File | undefined) {
@@ -682,15 +701,20 @@ export default function Home() {
 
   async function handleBudgetSelect(nextBudget: Budget) {
     if (isAnalyzing) return;
+    const budgetSelectedAt = Date.now();
+    budgetSelectStartRef.current = budgetSelectedAt;
+    devLog(`budget selected (${nextBudget})`);
 
     if (isSampleItem) {
       setAiAnalysis(getSampleAnalysis(eventType, vibeType, nextBudget));
       setBudget(nextBudget);
+      devLog("result state set (sample path)", Date.now() - budgetSelectedAt);
       return;
     }
 
     if (!uploadedFile) {
       setBudget(nextBudget);
+      devLog("budget set without upload", Date.now() - budgetSelectedAt);
       return;
     }
 
@@ -792,6 +816,21 @@ export default function Home() {
 
     return () => window.clearInterval(intervalId);
   }, [isAnalyzing]);
+
+  useEffect(() => {
+    if (!showResult) {
+      hasLoggedResultRenderRef.current = false;
+      return;
+    }
+    if (hasLoggedResultRenderRef.current) return;
+
+    if (budgetSelectStartRef.current) {
+      devLog("result rendered from budget select", Date.now() - budgetSelectStartRef.current);
+    } else {
+      devLog("result rendered");
+    }
+    hasLoggedResultRenderRef.current = true;
+  }, [showResult]);
 
   useEffect(() => {
     if (!showResult || !outfit || !eventType || !vibeType || !budget) {

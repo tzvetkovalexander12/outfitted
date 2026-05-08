@@ -24,8 +24,20 @@ const ALLOWED_CATEGORIES = `[
 ]`;
 
 export async function POST(req: Request) {
+  const isDev = process.env.NODE_ENV === "development";
+  const startedAt = Date.now();
+  const devLog = (label: string, durationMs: number) => {
+    if (!isDev) return;
+    console.log(`[analyze-item] ${label}: ${durationMs}ms`);
+  };
+
+  devLog("request received", 0);
+
   try {
+    const formDataStart = Date.now();
     const formData = await req.formData();
+    devLog("formData parsed", Date.now() - formDataStart);
+
     const image = formData.get("image");
     const rawEventType = formData.get("eventType");
     const rawVibeType = formData.get("vibeType");
@@ -42,10 +54,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No image" }, { status: 400 });
     }
 
+    const fileBufferStart = Date.now();
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString("base64");
+    devLog("file buffer created", Date.now() - fileBufferStart);
 
+    const base64Start = Date.now();
+    const base64 = buffer.toString("base64");
+    devLog("base64 conversion completed", Date.now() - base64Start);
+
+    const openAiStart = Date.now();
+    devLog("OpenAI request started", Date.now() - startedAt);
     const response = await openai.responses.create({
       model: "gpt-4.1-mini",
       input: [
@@ -185,7 +204,9 @@ Include where natural: what the uploaded item naturally feels like, what the out
 Forbidden weak filler (never use): phrases like "matches your outfit", "great for your style", "versatile choice", "perfect for the vibe", or empty praise.
 Instead say what a piece DOES (sharpens the lower half, adds polish without formality, keeps focus on the uploaded item, balances proportion).
 
-Copy length and style rules (strict):
+Response style and concision rules (strict):
+- Return JSON only.
+- Be concise and avoid unnecessary explanation.
 - stylistDirection: max 35 words.
 - whyThisDirection: max 30 words.
 - each product note: max 18 words.
@@ -241,21 +262,30 @@ Good example:
             {
               type: "input_image",
               image_url: `data:${image.type};base64,${base64}`,
-              detail: "auto",
+              detail: "low",
             },
           ],
         },
       ],
     });
+    devLog("OpenAI response received", Date.now() - openAiStart);
 
+    const parseStart = Date.now();
     const text = response.output_text
       .replace(/```json|```/g, "")
       .trim();
+    const parsed = JSON.parse(text);
+    devLog("response parsed", Date.now() - parseStart);
+
+    const total = Date.now() - startedAt;
+    devLog("API response returned", total);
+    devLog("total", total);
 
     return NextResponse.json({
-      analysis: JSON.parse(text),
+      analysis: parsed,
     });
   } catch (err) {
+    devLog("failed before response", Date.now() - startedAt);
     console.error("ANALYZE ITEM API ERROR:", err);
 
     return NextResponse.json(
