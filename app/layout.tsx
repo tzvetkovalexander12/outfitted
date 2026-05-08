@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "FitAround | AI Outfit Matching",
   description:
     "Upload one clothing item and get outfit recommendations styled around your occasion, vibe, and budget.",
+  icons: {
+    icon: "/icon.svg",
+  },
   openGraph: {
     title: "FitAround | AI Outfit Matching",
     description: "Upload one item and get the rest of the outfit styled around it.",
