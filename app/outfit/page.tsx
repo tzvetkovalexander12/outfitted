@@ -444,9 +444,9 @@ function buildResultNote(budget: Budget) {
 /** Title override when AI returns `outfitDirection`; falls back to budget-based title. */
 function formatOutfitDirectionTitle(direction?: string | null): string | null {
   const t = typeof direction === "string" ? direction.toLowerCase().trim() : "";
-  if (t === "casual clean") return "Casual Clean Match";
-  if (t === "smart casual") return "Smart Casual Match";
-  if (t === "evening polished") return "Evening Polished Match";
+  if (t === "casual clean") return "Clean casual base";
+  if (t === "smart casual") return "Easy refined casual";
+  if (t === "evening polished") return "Polished off-duty";
   return null;
 }
 
@@ -505,24 +505,36 @@ function BackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function ProgressBar({ step }: { step: number }) {
-  const percent = Math.round((step / 4) * 100);
+function ProgressBar({
+  step,
+  isResult,
+}: {
+  step: number;
+  isResult: boolean;
+}) {
+  const percent = isResult ? 100 : Math.round((step / 5) * 100);
 
   return (
     <div className="mb-7">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
-          Step {step} of 4
+        <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.16em] text-zinc-600">
+          {isResult ? "Your result" : `Step ${step} of 4 + result`}
         </p>
         <p className="text-[11px] text-zinc-600">{percent}%</p>
       </div>
 
       <div className="flex items-center gap-1.5">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div
             key={s}
             className={`h-[3px] flex-1 rounded-full transition-all duration-500 ${
-              s <= step ? "bg-white" : "bg-white/10"
+              isResult || s <= step
+                ? s === 5
+                  ? "bg-zinc-300"
+                  : "bg-white"
+                : s === 5
+                  ? "bg-zinc-600/40"
+                  : "bg-white/10"
             }`}
           />
         ))}
@@ -541,12 +553,14 @@ function ProductImage({
   accent: string;
 }) {
   return (
-    <div className={`relative h-32 w-24 shrink-0 overflow-hidden bg-gradient-to-br ${accent}`}>
-      <div className="absolute inset-0 bg-black/10" />
+    <div
+      className={`group/image relative h-40 w-28 shrink-0 overflow-hidden rounded-l-[18px] border-r border-white/[0.06] bg-gradient-to-br ${accent} sm:h-44 sm:w-32`}
+    >
+      <div className="absolute inset-0 bg-zinc-900/35" />
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-contain p-1.5 transition duration-300 group-hover:scale-105"
+        className="h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover/image:scale-[1.03]"
       />
     </div>
   );
@@ -554,13 +568,13 @@ function ProductImage({
 
 function toCategoryLabel(rawCategory?: string): string | null {
   if (!rawCategory) return null;
-  if (rawCategory === "minimal accessory") return "Finishing detail";
+  if (rawCategory === "minimal accessory") return "Quiet detail";
   if (rawCategory === "tailored trousers") return "Sharper lower half";
-  if (rawCategory === "black jeans" || rawCategory === "blue jeans") return "Lower half anchor";
-  if (rawCategory === "chelsea boots" || rawCategory === "loafers") return "Polish piece";
-  if (rawCategory === "white sneakers" || rawCategory === "black sneakers") return "Clean footwear";
-  if (rawCategory === "overshirt" || rawCategory === "blazer") return "Layering piece";
-  return "Styling piece";
+  if (rawCategory === "black jeans" || rawCategory === "blue jeans") return "Polished base";
+  if (rawCategory === "chelsea boots" || rawCategory === "loafers") return "Smarter shoe";
+  if (rawCategory === "white sneakers" || rawCategory === "black sneakers") return "Clean foundation";
+  if (rawCategory === "overshirt" || rawCategory === "blazer") return "Relaxed layer";
+  return "Finishing touch";
 }
 
 export default function Home() {
@@ -828,7 +842,7 @@ export default function Home() {
           </div>
         </div>
 
-        <ProgressBar step={stepNumber} />
+        <ProgressBar step={stepNumber} isResult={showResult} />
 
         {(selectedSummary.budget ||
           selectedSummary.upload ||
@@ -1054,13 +1068,18 @@ export default function Home() {
             </div>
 
             {isAnalyzing && (
-              <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-4 py-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <span className="h-2 w-2 rounded-full bg-white/80 animate-pulse" />
-                  {ANALYZING_MESSAGES[analyzingMessageIndex]}
+              <div className="rounded-[24px] border border-white/20 bg-gradient-to-br from-white/[0.1] via-white/[0.05] to-transparent px-5 py-5 shadow-lg shadow-black/30">
+                <p className="flex items-center gap-2.5 text-base font-semibold text-white">
+                  <span className="inline-flex h-5 w-5 items-center justify-center">
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-white/80 border-t-transparent animate-spin" />
+                  </span>
+                  Building your outfit...
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+                  Analyzing your item, occasion, vibe, and budget.
                 </p>
                 <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-                  Usually takes a few seconds.
+                  {ANALYZING_MESSAGES[analyzingMessageIndex]}
                 </p>
               </div>
             )}
@@ -1109,8 +1128,8 @@ export default function Home() {
         )}
 
         {showResult && outfit && budget && uploadedImage && eventType && vibeType && (
-          <section>
-            <div className="mb-4 flex items-center justify-between gap-3">
+          <section className="pt-2">
+            <div className="mb-6 flex items-center justify-between gap-3">
               <BackButton onClick={() => setBudget(null)} />
               <button
                 onClick={resetAll}
@@ -1120,8 +1139,8 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="overflow-hidden rounded-[30px] border border-white/[0.08] bg-white/[0.03] shadow-2xl shadow-black/40 backdrop-blur">
-              <div className={`relative h-48 overflow-hidden bg-gradient-to-br ${outfit.accent}`}>
+            <div className="overflow-hidden rounded-[30px] border border-white/[0.08] bg-white/[0.025] shadow-2xl shadow-black/40 backdrop-blur">
+              <div className={`relative h-52 overflow-hidden bg-gradient-to-br ${outfit.accent}`}>
                 <img
                   src={uploadedImage}
                   alt="Uploaded clothing item"
@@ -1135,7 +1154,7 @@ export default function Home() {
                   <p className="mb-1.5 text-[10px] uppercase tracking-[0.28em] text-white/50">
                     Step 5 of 5
                   </p>
-                  <h2 className="text-2xl font-bold leading-tight tracking-tight text-white">
+                  <h2 className="text-[2rem] font-semibold leading-tight tracking-tight text-white sm:text-[2.15rem]">
                     {formatOutfitDirectionTitle(aiAnalysis?.outfitDirection) ??
                       outfit.title}
                   </h2>
@@ -1156,42 +1175,48 @@ export default function Home() {
                 <p className="text-sm leading-relaxed text-zinc-400">{resultNote}</p>
               </div>
 
-              <div className="px-5 py-5">
-                <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
+              <div className="space-y-6 px-5 py-7">
+                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.05] px-5 py-5 shadow-inner shadow-black/20">
                   <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
                     Stylist direction
                   </p>
-                  <p className="mt-2.5 text-sm leading-relaxed text-zinc-200">{stylistDirection}</p>
+                  <p className="mt-3 whitespace-pre-line text-[15px] leading-7 text-zinc-100">
+                    {stylistDirection}
+                  </p>
                 </div>
 
                 {stylingContrastNote && (
-                  <div className="mb-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
+                  <div className="rounded-[20px] border border-white/[0.06] bg-white/[0.03] px-5 py-4.5">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
                       Why this direction?
                     </p>
-                    <p className="mt-2.5 text-sm leading-relaxed text-zinc-300">{stylingContrastNote}</p>
+                    <p className="mt-2.5 whitespace-pre-line text-sm leading-7 text-zinc-300">
+                      {stylingContrastNote}
+                    </p>
                   </div>
                 )}
 
-                <p className="mb-5 text-[11px] leading-relaxed text-zinc-600">
+                <p className="text-[11px] leading-relaxed text-zinc-600">
                   {outfitFormula}
                 </p>
 
-                <div className="mb-3 flex items-center justify-between">
+                <div className="pt-1">
+                  <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-600">
                     Pieces that complete the look
                   </p>
                   <p className="text-[11px] text-zinc-600">{outfit.items.length} items</p>
+                  </div>
+                  <p className="mb-5 text-xs leading-relaxed text-zinc-500">
+                    These pieces support the styling direction, not just the color.
+                  </p>
                 </div>
-                <p className="mb-4 text-xs leading-relaxed text-zinc-500">
-                  These pieces are chosen to support the styling direction, not just match the color.
-                </p>
 
-                <div className="space-y-2.5">
+                <div className="space-y-4.5">
                   {outfit.items.map((item: OutfitItem, i: number) => (
                     <div
                       key={i}
-                      className="group overflow-hidden rounded-[20px] border border-white/[0.07] bg-zinc-950/60 transition duration-200 hover:scale-[1.012] hover:border-white/[0.15]"
+                      className="group overflow-hidden rounded-[20px] border border-white/[0.07] bg-zinc-950/55 transition duration-200 hover:border-white/[0.14]"
                     >
                       <div className="flex">
                         <ProductImage
@@ -1200,29 +1225,29 @@ export default function Home() {
                           accent={outfit.accentSolid}
                         />
 
-                        <div className="flex-1 p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
+                        <div className="flex-1 p-4.5 sm:p-5.5">
+                          <div className="flex items-start justify-between gap-3.5">
+                            <div className="space-y-1.5">
                               {item.brand && (
-                                <p className="mb-0.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">
+                                <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
                                   {item.brand}
                                 </p>
                               )}
-                              <p className="text-sm leading-snug text-zinc-100">{item.label}</p>
+                              <p className="text-sm leading-6 text-zinc-100">{item.label}</p>
                             </div>
                           </div>
 
                           {toCategoryLabel(item.category ?? aiRecommendedItems[i]) && (
-                            <p className="mt-2 inline-flex rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                            <p className="mt-3.5 inline-flex rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-300">
                               {toCategoryLabel(item.category ?? aiRecommendedItems[i])}
                             </p>
                           )}
 
-                          <div className="mt-3 rounded-[14px] border border-white/[0.1] bg-white/[0.05] px-3 py-3">
-                            <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="mt-4.5 rounded-[14px] border border-white/[0.08] bg-white/[0.035] px-4 py-4">
+                            <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
                               Why this works
                             </p>
-                            <p className="mt-1.5 text-sm leading-relaxed text-zinc-200">
+                            <p className="mt-2.5 whitespace-pre-line text-sm leading-7 text-zinc-200">
                               {getProductStylistNote({
                                 productName: item.label,
                                 brand: item.brand,
@@ -1253,9 +1278,9 @@ export default function Home() {
                                 budget,
                               })
                             }
-                            className="mt-3 inline-flex rounded-full border border-white/10 bg-white/[0.02] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
+                            className="mt-4.5 inline-flex min-h-10 items-center rounded-full border border-white/10 bg-white/[0.02] px-4 py-2 text-sm font-medium text-zinc-200 transition-all duration-200 hover:scale-[1.03] hover:border-white/25 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
                           >
-                            Shop piece →
+                            View piece →
                           </a>
                         </div>
                       </div>
@@ -1264,12 +1289,12 @@ export default function Home() {
                 </div>
 
                 {upgradeMove && (
-                  <div className="mt-5 rounded-[22px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 shadow-inner shadow-black/20">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">Upgrade move</p>
+                  <div className="rounded-[20px] border border-white/[0.06] bg-white/[0.025] px-5 py-4">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">Upgrade move</p>
                     <p className="mt-2.5 text-sm leading-relaxed text-zinc-300">{upgradeMove}</p>
                     {aiAnalysis && (
                       <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
-                        <span className="uppercase tracking-[0.16em] text-zinc-600">Direction: </span>
+                        <span className="uppercase tracking-[0.14em] text-zinc-600">Direction: </span>
                         <span className="font-medium text-zinc-300">
                           {formatOutfitDirectionLabel(resolvedOutfitDirection)}
                         </span>
@@ -1278,7 +1303,7 @@ export default function Home() {
                   </div>
                 )}
 
-                <p className="mt-5 text-[11px] leading-relaxed text-zinc-600">
+                <p className="pt-1 text-[11px] leading-relaxed text-zinc-600">
                   Some product links may be{" "}
                   <Link href="/affiliate-disclosure" className="underline decoration-zinc-700/70 hover:text-zinc-400">
                     affiliate links

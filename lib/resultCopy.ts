@@ -33,15 +33,25 @@ export function getStylistDirection(context: StylingContext): string {
   const occasion = normalize(context.occasion);
   const vibe = normalize(context.vibe);
   const hoodieBase = isHoodieItem(context.uploadedItemType);
+  const itemColor = normalize(context.uploadedItemColor);
+  const hasTailoredTrousers = (context.selectedCategories ?? []).some(
+    (category) => normalize(category) === "tailored trousers"
+  );
 
   if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
-    return "Your hoodie is relaxed by default, so this outfit sharpens the lower half instead of forcing it to look formal. The goal is clean, intentional, and date-ready without losing the casual feel.";
+    if (hasTailoredTrousers && itemColor === "black") {
+      return "Your hoodie keeps a relaxed base, while the lighter trouser softens the dark top and cleans up the lower half. It reads polished off-duty and intentional, not formal.";
+    }
+    if (hasTailoredTrousers) {
+      return "Your hoodie keeps the base relaxed, and the tailored trouser adds cleaner contrast through the lower half. The point is relaxed-sharp and date-ready, not office-formal.";
+    }
+    return "Your hoodie stays relaxed, then the lower half gets sharper so the outfit feels cleaner and intentional for date context. It is polished off-duty, not formal.";
   }
   if (
     hoodieBase &&
     (occasion === "casual-day" || occasion === "vacation" || vibe === "safe" || vibe === "minimal")
   ) {
-    return "This keeps the hoodie easy and wearable, then adds cleaner structure around it. The result feels relaxed, intentional, and more considered than a basic hoodie combo.";
+    return "This keeps the hoodie easy and wearable, then cleans up the surrounding pieces. The result feels relaxed-sharp, intentional, and more considered than a basic hoodie combo.";
   }
   if (occasion === "vacation") {
     return "This leans relaxed and breathable — comfort-first pieces that still read considered when you are away from home.";
@@ -60,12 +70,25 @@ export function getStylingContrastNote(context: StylingContext): string | null {
   const occasion = normalize(context.occasion);
   const vibe = normalize(context.vibe);
   const hoodieBase = isHoodieItem(context.uploadedItemType);
+  const itemColor = normalize(context.uploadedItemColor);
+  const hasTailoredTrousers = (context.selectedCategories ?? []).some(
+    (category) => normalize(category) === "tailored trousers"
+  );
+  const hasWhiteSneakers = (context.selectedCategories ?? []).some(
+    (category) => normalize(category) === "white sneakers"
+  );
 
   if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
+    if (hasTailoredTrousers && itemColor === "black" && hasWhiteSneakers) {
+      return "These trousers sharpen the hoodie by cleaning up the lower half. The lighter trouser softens the dark hoodie and makes the outfit feel more styled, while clean sneakers keep it casual.";
+    }
+    if (hasTailoredTrousers) {
+      return "These trousers sharpen the hoodie by cleaning up the lower half. The point is relaxed-sharp, not formal.";
+    }
     return "Blue jeans would work, but they can read too basic here. A darker or sharper lower half keeps the hoodie casual while making the whole look more intentional.";
   }
   if (hoodieBase && vibe === "expensive-looking") {
-    return "The point is not to make the hoodie formal. The point is to contrast it with cleaner pieces so the outfit feels relaxed-sharp.";
+    return "The point is not to make the hoodie formal. It is cleaner contrast so the outfit feels intentional and relaxed-sharp.";
   }
   if (vibe === "minimal") {
     return "Minimal does not mean plain. The outfit relies on cleaner shapes and fewer distractions.";
@@ -124,11 +147,11 @@ function getCategoryRoleNote(context: ProductNoteContext): string | null {
     return "Keeps the look casual and familiar. Best when the outfit direction is safe or relaxed.";
   }
   if (category === "tailored trousers") {
-    if (hoodieBase) return "They give the hoodie a cleaner lower half, so the outfit feels intentional instead of lazy.";
+    if (hoodieBase) return "Cleaner contrast under a hoodie: they sharpen the lower half without making it feel formal.";
     return "Adds a cleaner shape so the outfit feels more intentional without becoming too formal.";
   }
   if (category === "white sneakers") {
-    if (hoodieBase) return "Keeps the hoodie relaxed, but the clean sneaker shape makes the outfit feel intentional.";
+    if (hoodieBase) return "Keeps the hoodie casual, while the clean shape keeps the overall look intentional.";
     return "Keeps the outfit relaxed, but the clean shape makes it feel more considered.";
   }
   if (category === "black sneakers") {
@@ -170,5 +193,5 @@ export function getProductStylistNote(context: ProductNoteContext): string {
   if (roleNote) return roleNote;
 
   const itemType = normalize(context.uploadedItemType) || "main piece";
-  return `Plays a clear role in the full look so your ${itemType} stays the focus and the rest supports proportion and polish.`;
+  return `Supports the direction around your ${itemType} so the look stays intentional and clean.`;
 }

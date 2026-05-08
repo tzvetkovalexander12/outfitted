@@ -42,11 +42,7 @@ export default function LandingPage() {
           Built to make outfit decisions faster, sharper, and less generic.
         </p>
 
-        <p className="text-sm text-zinc-500 mb-3 max-w-xs">No signup needed. Free to try.</p>
-
-        <p className="text-xs text-zinc-600 mb-10 max-w-xs leading-relaxed">
-          Photos are only used to generate your outfit recommendation.
-        </p>
+        <p className="text-sm text-zinc-500 mb-10 max-w-xs">No signup needed. Free to try.</p>
 
         <div className="flex flex-col gap-3 mb-12">
           <Link
@@ -88,7 +84,7 @@ export default function LandingPage() {
             How it works
           </p>
           <h2 className="text-3xl font-bold tracking-tight leading-tight">
-            Five steps.
+            Four steps, then your result.
             <br />
             <span className="text-zinc-400">One better outfit.</span>
           </h2>
@@ -98,28 +94,23 @@ export default function LandingPage() {
           {[
             {
               step: "01",
-              title: "Upload your item",
-              desc: "Start with one clothing piece you already own.",
+              title: "Upload one item or try a sample",
+              desc: "Start with one clothing piece you own, or use a sample item first.",
             },
             {
               step: "02",
-              title: "Pick the context",
+              title: "Choose occasion",
               desc: "Choose where you are wearing it, like dinner, work, party, or travel.",
             },
             {
               step: "03",
-              title: "Choose the vibe",
+              title: "Choose vibe",
               desc: "Go safe, minimal, bold, or expensive-looking.",
             },
             {
               step: "04",
-              title: "Pick budget",
+              title: "Choose budget",
               desc: "Set your spend level so recommendations fit your price range.",
-            },
-            {
-              step: "05",
-              title: "Shop matching pieces",
-              desc: "Get products that work around your item and outfit direction.",
             },
           ].map((item) => (
             <div
@@ -135,6 +126,24 @@ export default function LandingPage() {
               </div>
             </div>
           ))}
+
+          <div className="my-1 flex items-center gap-3 px-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+            <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Then your result</p>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+          </div>
+
+          <div className="rounded-[24px] border border-white/15 bg-gradient-to-br from-white/[0.07] via-white/[0.04] to-transparent px-5 py-5 flex gap-5 items-start">
+            <span className="mt-1 shrink-0 rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-zinc-300">
+              Result
+            </span>
+            <div>
+              <p className="mb-1 text-base font-semibold text-white">Your styled result</p>
+              <p className="text-sm leading-relaxed text-zinc-400">
+                Get a complete outfit direction with stylist notes and pieces that complete the look.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
