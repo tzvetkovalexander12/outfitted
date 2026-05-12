@@ -40,12 +40,12 @@ export function getStylistDirection(context: StylingContext): string {
 
   if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
     if (hasTailoredTrousers && itemColor === "black") {
-      return "Your hoodie keeps a relaxed base, while the lighter trouser softens the dark top and cleans up the lower half. It reads polished off-duty and intentional, not formal.";
+      return "Your hoodie keeps a relaxed-sharp base. A cleaner, darker lower half balances the look so it feels intentional and wearable — polished off-duty, not a suit formula.";
     }
     if (hasTailoredTrousers) {
-      return "Your hoodie keeps the base relaxed, and the tailored trouser adds cleaner contrast through the lower half. The point is relaxed-sharp and date-ready, not office-formal.";
+      return "Your hoodie keeps the base relaxed, and the trouser sharpens the lower half with cleaner lines. The point is relaxed-sharp and date-ready, not office-formal.";
     }
-    return "Your hoodie stays relaxed, then the lower half gets sharper so the outfit feels cleaner and intentional for date context. It is polished off-duty, not formal.";
+    return "Your hoodie stays relaxed, then the lower half gets tidier so the outfit feels more intentional for date context — polished off-duty, not formal.";
   }
   if (
     hoodieBase &&
@@ -80,10 +80,10 @@ export function getStylingContrastNote(context: StylingContext): string | null {
 
   if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
     if (hasTailoredTrousers && itemColor === "black" && hasWhiteSneakers) {
-      return "These trousers sharpen the hoodie by cleaning up the lower half. The lighter trouser softens the dark hoodie and makes the outfit feel more styled, while clean sneakers keep it casual.";
+      return "These trousers give the lower half a cleaner line under the hoodie. The mix stays casual, but the proportions feel more intentional than default denim — relaxed-sharp, not dressy.";
     }
     if (hasTailoredTrousers) {
-      return "These trousers sharpen the hoodie by cleaning up the lower half. The point is relaxed-sharp, not formal.";
+      return "These bottoms sharpen the hoodie by tidying the lower half. The point is relaxed-sharp and wearable, not formal.";
     }
     return "Blue jeans would work, but they can read too basic here. A darker or sharper lower half keeps the hoodie casual while making the whole look more intentional.";
   }
@@ -147,7 +147,8 @@ function getCategoryRoleNote(context: ProductNoteContext): string | null {
     return "Keeps the look casual and familiar. Best when the outfit direction is safe or relaxed.";
   }
   if (category === "tailored trousers") {
-    if (hoodieBase) return "Cleaner contrast under a hoodie: they sharpen the lower half without making it feel formal.";
+    if (hoodieBase)
+      return "Cleaner lower half under a hoodie — sharper lines without turning the outfit into office tailoring.";
     return "Adds a cleaner shape so the outfit feels more intentional without becoming too formal.";
   }
   if (category === "white sneakers") {

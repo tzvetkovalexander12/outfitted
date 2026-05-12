@@ -1270,9 +1270,97 @@ export const PRODUCTS: ExternalProduct[] = [
 
 export const NORMALIZED_PRODUCTS: Product[] = PRODUCTS.map(normalizeProduct);
 
+/** Context for bottoms/shoes when the uploaded item is a dark hoodie (linen / pale-chino guard). */
+export type OutfitRecommendationContext = {
+  uploadedItemType?: string;
+  uploadedItemColor?: string;
+  occasion?: string;
+  vibe?: string;
+};
+
+function normalizeCtx(s?: string): string {
+  return (s ?? "").toLowerCase().trim();
+}
+
+function isHoodieOrSweatshirtType(itemType?: string): boolean {
+  const t = normalizeCtx(itemType);
+  return t.includes("hoodie") || t.includes("sweatshirt");
+}
+
+function isDarkHoodieUpload(itemType?: string, itemColor?: string): boolean {
+  if (!isHoodieOrSweatshirtType(itemType)) return false;
+  const c = normalizeCtx(itemColor);
+  const t = normalizeCtx(itemType);
+  if (["black", "charcoal", "navy", "dark", "graphite", "ink"].some((x) => c.includes(x))) {
+    return true;
+  }
+  if (t.includes("black") || t.includes("dark") || t.includes("navy")) return true;
+  return false;
+}
+
+/** Light linen suit-style trouser — not the default with a dark hoodie unless warm-weather context. */
+function isLightLinenBottom(product: Product): boolean {
+  const text = `${product.label} ${product.note}`.toLowerCase();
+  if (!text.includes("linen")) return false;
+  if (product.colors.some((c) => /black|navy|charcoal|graphite|ink/i.test(c))) {
+    return false;
+  }
+  if (/\bblack\b|\bcharcoal\b|\bnavy\b|\bink\b|\bdark (grey|gray|blue|brown)\b/.test(text)) {
+    return false;
+  }
+  return true;
+}
+
+function isLightBeigeChino(product: Product): boolean {
+  if (product.category !== "chinos") return false;
+  const text = `${product.label} ${product.note}`.toLowerCase();
+  if (/\bblack\b|\bcharcoal\b|\bnavy\b|\bdark\b/.test(text)) return false;
+  return (
+    /\b(beige|ecru|tan|cream|sand|oat|stone)\b/.test(text) ||
+    /light (beige|stone|tan|khaki)/.test(text)
+  );
+}
+
+function allowsWarmWeatherLightBottoms(occasion?: string, vibe?: string): boolean {
+  const o = normalizeCtx(occasion);
+  const v = normalizeCtx(vibe);
+  if (o === "vacation") return true;
+  if (o === "casual-day") return true;
+  if (o === "dinner" && v === "expensive-looking") return true;
+  return false;
+}
+
+function shouldDeferLightBottomsForDarkHoodie(ctx?: OutfitRecommendationContext): boolean {
+  if (!ctx) return false;
+  if (!isDarkHoodieUpload(ctx.uploadedItemType, ctx.uploadedItemColor)) return false;
+  if (allowsWarmWeatherLightBottoms(ctx.occasion, ctx.vibe)) return false;
+  return true;
+}
+
+function filterPrioritizedForDarkHoodie(
+  category: ProductCategory,
+  prioritized: Product[],
+  ctx: OutfitRecommendationContext | undefined
+): Product[] {
+  if (!shouldDeferLightBottomsForDarkHoodie(ctx)) return prioritized;
+
+  if (category === "tailored trousers") {
+    const withoutLightLinen = prioritized.filter((p) => !isLightLinenBottom(p));
+    return withoutLightLinen.length > 0 ? withoutLightLinen : prioritized;
+  }
+
+  if (category === "chinos") {
+    const withoutPale = prioritized.filter((p) => !isLightBeigeChino(p));
+    return withoutPale.length > 0 ? withoutPale : prioritized;
+  }
+
+  return prioritized;
+}
+
 export function getProductsForCategories(
   categories: string[],
-  budget: Budget
+  budget: Budget,
+  context?: OutfitRecommendationContext
 ): Product[] {
   const selected: Product[] = [];
   const seen = new Set<string>();
@@ -1309,18 +1397,24 @@ export function getProductsForCategories(
               : searchResults
             : searchResults;
 
+    const prioritizedForPick = filterPrioritizedForDarkHoodie(
+      category,
+      prioritized,
+      context
+    );
+
     let next: Product | undefined;
 
     if (category === "minimal accessory") {
-      const nonBeltAccessories = prioritized.filter((product) => !isBeltAccessory(product));
+      const nonBeltAccessories = prioritizedForPick.filter((product) => !isBeltAccessory(product));
       next =
         lastSelectedAccessoryWasBelt && nonBeltAccessories.length > 0
           ? pickRandomProduct(nonBeltAccessories)
-          : pickRandomProduct(prioritized);
+          : pickRandomProduct(prioritizedForPick);
 
       if (next) lastSelectedAccessoryWasBelt = isBeltAccessory(next);
     } else {
-      next = pickRandomProduct(prioritized);
+      next = pickRandomProduct(prioritizedForPick);
     }
 
     if (!next) continue;

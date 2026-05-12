@@ -159,21 +159,26 @@ Hoodie + blazer rule:
 - If you use a blazer with hoodie, treat blazer as a relaxed sharp layer.
 - Avoid formal suit styling with bulky hoodies.
 
+Black or dark hoodie + bottoms (important):
+- Prefer darker, cleaner bottoms first: "black jeans", neutral/dark "tailored trousers", navy or charcoal "chinos". Avoid pale linen or ecru trousers as the default — they are for warm-weather contexts.
+- For EVENT "date" with VIBE "minimal", strongly prefer "black jeans" or dark/neutral tailored bottoms before light linen-style trousers.
+- Light linen / airy tailored trousers belong when EVENT is "vacation" or "casual-day", or for "dinner" with VIBE "expensive-looking" (warm polished evening). Not the default for date + minimal.
+
 Hoodie/sweatshirt + date vibe-specific patterns:
 - safe:
   - usually: "black jeans" + ("white sneakers" or "black sneakers") + "minimal accessory"
   - safe should feel easy, wearable, low-risk, and cleaner than casual-day.
 - minimal:
-  - usually: ("black jeans" or "tailored trousers") + "white sneakers" + "minimal accessory"
+  - usually: prefer "black jeans" for black/dark hoodies; otherwise ("black jeans" or dark/neutral "tailored trousers") + "white sneakers" + "minimal accessory"
   - minimal should feel clean, simple, tonal, and not over-styled.
 - bold:
   - usually: "black jeans" + "chelsea boots" + ("blazer" or "minimal accessory")
   - bold should add stronger silhouette or contrast, not just trousers + belt.
 - expensive-looking:
-  - usually: "tailored trousers" + "chelsea boots" + ("minimal accessory" or "blazer")
-  - should feel tonal, polished, refined.
+  - usually: dark/neutral "tailored trousers" + "chelsea boots" + ("minimal accessory" or "blazer")
+  - should feel tonal, polished, refined — still relaxed-sharp, not a suit costume.
   - prefer black chelsea boots with a black hoodie unless the outfit is clearly warm/neutral.
-  - avoid linen-looking tailored trousers with a black hoodie unless the context is vacation/summer.
+  - avoid light linen-looking tailored trousers with a black/dark hoodie unless EVENT is "vacation", "casual-day", or warm-evening "dinner" with this vibe.
 
 Vibe differentiation rule:
 - For the same uploaded item + same event, outputs across vibes must be clearly different.

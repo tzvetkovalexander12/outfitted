@@ -623,7 +623,14 @@ function OutfitFlow() {
     aiAnalysis?.outfitDirection
   );
 
-  const dynamicItems = budget ? getProductsForCategories(aiRecommendedItems, budget) : [];
+  const dynamicItems = budget
+    ? getProductsForCategories(aiRecommendedItems, budget, {
+        uploadedItemType: aiAnalysis?.itemType,
+        uploadedItemColor: aiAnalysis?.mainColor,
+        occasion: eventType ?? undefined,
+        vibe: vibeType ?? undefined,
+      })
+    : [];
 
   const outfit =
     budget && dynamicItems.length > 0
