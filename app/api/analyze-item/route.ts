@@ -135,6 +135,24 @@ recommendedPieces must:
 - include 3 pieces maximum
 - only use exact allowed category values
 
+Finishing accessories ("minimal accessory") — jewelry, sunglasses, small details (NOT the outfit foundation):
+
+When to PUSH subtle jewelry / accessories:
+- EVENT is "date", "dinner", or "party": subtle chains, bracelets, watches, rings, or sunglasses are natural finishing touches once tops/bottoms/shoes are covered.
+- Hoodie/sweatshirt + EVENT "party" + VIBE "bold" or "expensive-looking": prefer a premium "minimal accessory" as the third piece over "blazer" when black jeans/dark trousers + chelsea boots or strong sneakers already sharpen the outfit — nightlife-ready polish, not suit layers.
+- VIBE is "expensive-looking": accessories read as intentional polish.
+- VIBE is "minimal" when the outfit is already clean and the core pieces are set.
+
+When to REDUCE jewelry / "minimal accessory" as the default third piece:
+- EVENT is "casual-day", "work", or "vacation": do NOT default the third slot to a ring/jewelry item if overshirt, oxford shirt, blazer (when appropriate), chinos, jeans, tailored trousers, white sneakers, black sneakers, loafers, or chelsea boots would complete the outfit better.
+- casual-day + VIBE "safe" or "bold": strongly avoid "minimal accessory" as the third piece unless no stronger allowed category applies.
+- casual-day: only use "minimal accessory" when (a) VIBE is "minimal" or "expensive-looking" AND the first two recommended pieces already anchor bottom + shoes (or equivalent strong core), OR (b) no better clothing/shoe/layer option exists from the allowed list.
+- work / vacation: prioritize practical layers and footwear; jewelry only when it clearly elevates without replacing a needed garment or shoe.
+
+Belts: never default to a belt. Prefer chain, bracelet, watch, ring, or sunglasses when choosing "minimal accessory".
+
+Foundation rule: accessories finish the look — they should not carry the whole styling idea when a shirt, layer, trouser, or shoe still needs fixing.
+
 Special hoodie/sweatshirt guidance:
 - If the uploaded item is a hoodie or sweatshirt, treat it as a casual base.
 - Build around that base by doing at least one of:
@@ -148,16 +166,19 @@ Hoodie/sweatshirt + date general rule:
 - The look should feel relaxed but intentional, not like basic casual-day.
 - Avoid "blue jeans" unless VIBE is "safe" and affordability is important.
 - Prefer "black jeans" or "tailored trousers" for the lower half.
-- Prefer "white sneakers", "black sneakers", "chelsea boots", or "minimal accessory" based on vibe.
+- Prefer "white sneakers", "black sneakers", or "chelsea boots" first; add subtle jewelry/sunglasses as a date-night finishing touch when the outfit already has strong trousers/shoes.
 - Do not overuse belts as the default third item.
 
 Hoodie + overshirt rule:
 - Hoodie + "overshirt" is usually good for casual-day, vacation, safe, and minimal.
 
-Hoodie + blazer rule:
-- Only recommend "blazer" with hoodie when EVENT is "date", "party", or "dinner" AND VIBE is "bold" or "expensive-looking".
-- If you use a blazer with hoodie, treat blazer as a relaxed sharp layer.
-- Avoid formal suit styling with bulky hoodies.
+Hoodie + blazer rule (blazers are rare — accessories often win):
+- Prefer "minimal accessory" (silver chain, bracelet, ring, watch, subtle necklace) as the third piece when the first two pieces already cover a sharp bottom + strong shoes — especially for nightlife/party.
+- For EVENT "party" with VIBE "bold" or "expensive-looking": STRONGLY prefer "minimal accessory" over "blazer" as the third piece. Target look: polished off-duty, sharp but casual, intentional, not formal, not business-like.
+- Default party structure for hoodies: sharper bottom ("black jeans", dark jeans, or dark trousers) + stronger shoe ("chelsea boots", "black sneakers", or premium sneakers) + "minimal accessory". Avoid hoodie + suit-like blazer as the default.
+- Do NOT default to "blazer" for hoodie + party when jewelry would finish the outfit more naturally. Avoid wool-linen suit tailoring, stiff suit blazers, or office/business blazers over a hoodie.
+- Only recommend "blazer" with a hoodie when EVENT is "date", "party", or "dinner" AND VIBE is "bold" or "expensive-looking" AND you need a soft, unstructured, casual layer — not when an accessory is the stronger third piece.
+- If you use "blazer" with a hoodie, it must read relaxed-sharp and off-duty (soft or unstructured), never corporate.
 
 Black or dark hoodie + bottoms (important):
 - Prefer darker, cleaner bottoms first: "black jeans", neutral/dark "tailored trousers", navy or charcoal "chinos". Avoid pale linen or ecru trousers as the default — they are for warm-weather contexts.
@@ -172,10 +193,12 @@ Hoodie/sweatshirt + date vibe-specific patterns:
   - usually: prefer "black jeans" for black/dark hoodies; otherwise ("black jeans" or dark/neutral "tailored trousers") + "white sneakers" + "minimal accessory"
   - minimal should feel clean, simple, tonal, and not over-styled.
 - bold:
-  - usually: "black jeans" + "chelsea boots" + ("blazer" or "minimal accessory")
+  - For EVENT "party": usually "black jeans" + "chelsea boots" + "minimal accessory" — prefer this over "blazer" for hoodie/sweatshirt uploads.
+  - Otherwise: "black jeans" + "chelsea boots" + ("minimal accessory" first; "blazer" only if a soft layer is clearly needed over jewelry).
   - bold should add stronger silhouette or contrast, not just trousers + belt.
 - expensive-looking:
-  - usually: dark/neutral "tailored trousers" + "chelsea boots" + ("minimal accessory" or "blazer")
+  - For EVENT "party" with hoodie: dark bottom + "chelsea boots" + "minimal accessory" — avoid suit-like "blazer" unless accessory cannot complete the look.
+  - Otherwise: dark/neutral "tailored trousers" + "chelsea boots" + ("minimal accessory" preferred over "blazer" for hoodies).
   - should feel tonal, polished, refined — still relaxed-sharp, not a suit costume.
   - prefer black chelsea boots with a black hoodie unless the outfit is clearly warm/neutral.
   - avoid light linen-looking tailored trousers with a black/dark hoodie unless EVENT is "vacation", "casual-day", or warm-evening "dinner" with this vibe.
@@ -185,12 +208,11 @@ Vibe differentiation rule:
 - For hoodie + date + mid-range, keep this differentiation:
   - safe: black jeans + white sneakers + minimal accessory
   - minimal: tailored trousers or black jeans + white sneakers + minimal accessory
-  - bold: black jeans + chelsea boots + blazer or minimal accessory
-  - expensive-looking: tailored trousers + chelsea boots + blazer or minimal accessory
+  - bold: black jeans + chelsea boots + minimal accessory (prefer over blazer)
+  - expensive-looking: tailored trousers + chelsea boots + minimal accessory (prefer over blazer)
+- For hoodie + party + bold or expensive-looking + premium/mid: third piece should usually be "minimal accessory", not "blazer".
 
-Minimal accessory guidance:
-- "minimal accessory" can be belt, necklace/bracelet, ring, or sunglasses.
-- Do not default to belt repeatedly when a stronger clothing category would better differentiate the outfit.
+Reminder: follow "Finishing accessories" rules above — especially casual-day vs date/dinner/party.
 
 Return ONLY valid JSON with this shape:
 {

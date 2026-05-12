@@ -170,10 +170,34 @@ function getCategoryRoleNote(context: ProductNoteContext): string | null {
     return "Adds structure and layering without making the outfit feel overdressed.";
   }
   if (category === "blazer") {
-    if (hoodieBase) return "This works as relaxed-sharp contrast: the hoodie keeps it casual, the blazer adds shape.";
+    if (hoodieBase && occasion === "party") {
+      return "Soft, unstructured shape only — keeps the hoodie nightlife-sharp without suit energy.";
+    }
+    if (hoodieBase) return "Relaxed-sharp contrast: the hoodie stays casual; the layer adds shape, not office formality.";
     return "Adds shape and contrast. Best when the outfit is meant to feel relaxed-sharp.";
   }
   if (category === "minimal accessory") {
+    if (hoodieBase && occasion === "party") {
+      return "Adds a small statement without making the hoodie feel dressed up.";
+    }
+    if (occasion === "date" || occasion === "dinner" || occasion === "party") {
+      if (occasion === "date") {
+        return "Adds quiet polish for a date without feeling try-hard.";
+      }
+      if (occasion === "dinner") {
+        return "Adds a small finishing detail without making the outfit look overdone.";
+      }
+      return "Gives the outfit a sharper party detail while keeping it relaxed.";
+    }
+    if (occasion === "casual-day") {
+      if (vibe === "minimal" || vibe === "expensive-looking") {
+        return "Keeps the look simple while adding a little finish.";
+      }
+      return "A small extra detail if the rest of the outfit is already clean.";
+    }
+    if (occasion === "work" || occasion === "vacation") {
+      return "A light finishing touch if clothing and shoes already carry the look.";
+    }
     return "Finishes the outfit quietly without pulling attention away from the main piece.";
   }
   if (category === "oxford shirt") {

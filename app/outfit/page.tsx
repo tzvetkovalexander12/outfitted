@@ -449,12 +449,100 @@ function buildResultNote(budget: Budget) {
   return "Built around your item and where you're wearing it — tuned to a premium budget.";
 }
 
-/** Title override when AI returns `outfitDirection`; falls back to budget-based title. */
-function formatOutfitDirectionTitle(direction?: string | null): string | null {
-  const t = typeof direction === "string" ? direction.toLowerCase().trim() : "";
-  if (t === "casual clean") return "Clean casual base";
-  if (t === "smart casual") return "Easy refined casual";
-  if (t === "evening polished") return "Polished off-duty";
+/**
+ * Rich title when AI returns `outfitDirection`; falls back to budget-based `outfit.title`.
+ * Keeps "Easy refined casual" for relaxed casual-day/vacation — not for date/dinner sharpening.
+ */
+function resolveOutfitResultTitle(
+  directionRaw: string | undefined | null,
+  eventType: EventType | null,
+  vibeType: VibeType | null,
+  budget: Budget,
+  itemType: string | undefined | null
+): string | null {
+  if (directionRaw == null || String(directionRaw).trim() === "") return null;
+
+  const direction = normalizeOutfitDirection(directionRaw);
+  const occ = eventType;
+  const v = vibeType;
+  const item = (itemType ?? "").toLowerCase();
+
+  if (!occ || !v) return null;
+
+  const isHoodie = item.includes("hoodie") || item.includes("sweatshirt");
+  const isWhiteTee =
+    !isHoodie &&
+    ((item.includes("white") &&
+      (item.includes("t-shirt") || item.includes("tee") || item.includes("tshirt"))) ||
+      item.includes("white t-shirt"));
+  const isBlueJeans =
+    item.includes("blue jeans") ||
+    (item.includes("jean") &&
+      (item.includes("blue") || item.includes("indigo") || item.includes("light wash")));
+
+  if (occ === "date" && v === "minimal" && isBlueJeans) {
+    return budget === "premium" ? "Sharp casual date" : "Clean date-night casual";
+  }
+
+  if (occ === "dinner" && v === "expensive-looking" && budget === "premium") {
+    if (isWhiteTee) return "Polished T-shirt dinner";
+    return "Elevated evening casual";
+  }
+
+  if (occ === "dinner" && v === "expensive-looking" && budget === "mid") {
+    if (isWhiteTee) return "Refined off-duty dinner";
+    return "Refined dinner look";
+  }
+
+  if (isHoodie && occ === "date") {
+    return "Clean date-night casual";
+  }
+
+  if (isHoodie && occ === "dinner") {
+    return "Relaxed-sharp casual";
+  }
+
+  if (occ === "date") {
+    if (direction === "evening polished") return "Polished casual date";
+    if (direction === "smart casual") return "Sharp casual date";
+    if (v === "minimal") return "Minimal date fit";
+    return "Clean date-night casual";
+  }
+
+  if (occ === "dinner") {
+    if (v === "expensive-looking") return "Polished dinner base";
+    if (direction === "evening polished") return "Refined dinner look";
+    return "Clean evening fit";
+  }
+
+  if (occ === "party") {
+    return direction === "evening polished" ? "Clean evening fit" : "Sharp night-out fit";
+  }
+
+  if (occ === "work") {
+    return direction === "evening polished" ? "Polished work look" : "Smart work casual";
+  }
+
+  if (occ === "vacation") {
+    if (direction === "casual clean") return "Easy vacation casual";
+    return "Easy refined casual";
+  }
+
+  if (direction === "casual clean") {
+    return "Clean casual base";
+  }
+
+  if (direction === "evening polished") {
+    return "Polished off-duty";
+  }
+
+  if (direction === "smart casual") {
+    if (occ === "casual-day") {
+      return "Easy refined casual";
+    }
+    return "Refined everyday match";
+  }
+
   return null;
 }
 
@@ -1266,8 +1354,13 @@ function OutfitFlow() {
                     Step 5 of 5
                   </p>
                   <h2 className="text-[2rem] font-semibold leading-tight tracking-tight text-white sm:text-[2.15rem]">
-                    {formatOutfitDirectionTitle(aiAnalysis?.outfitDirection) ??
-                      outfit.title}
+                    {resolveOutfitResultTitle(
+                      aiAnalysis?.outfitDirection,
+                      eventType,
+                      vibeType,
+                      budget,
+                      aiAnalysis?.itemType
+                    ) ?? outfit.title}
                   </h2>
                   <p className="mt-2 text-xs text-white/50">{outfit.imageLabel}</p>
                 </div>
