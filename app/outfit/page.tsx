@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { track } from "@vercel/analytics";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { getProductsForCategories } from "../../lib/products";
 import {
   getProductStylistNote,
@@ -561,13 +562,13 @@ function ProductImage({
 }) {
   return (
     <div
-      className={`group/image relative h-40 w-28 shrink-0 overflow-hidden rounded-l-[18px] border-r border-white/[0.06] bg-gradient-to-br ${accent} sm:h-44 sm:w-32`}
+      className={`group/image relative h-48 w-32 shrink-0 overflow-hidden rounded-l-[20px] border-r border-white/[0.08] bg-gradient-to-br ${accent} sm:h-52 sm:w-36`}
     >
-      <div className="absolute inset-0 bg-zinc-900/35" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-zinc-800/10 via-zinc-950/40 to-zinc-950/72" />
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover/image:scale-[1.03]"
+        className="relative z-10 h-full w-full object-contain p-4 transition-transform duration-300 ease-out group-hover/image:scale-[1.03] sm:p-5"
       />
     </div>
   );
@@ -584,7 +585,9 @@ function toCategoryLabel(rawCategory?: string): string | null {
   return "Finishing touch";
 }
 
-export default function Home() {
+function OutfitFlow() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const isDev = process.env.NODE_ENV === "development";
   const devLog = (label: string, durationMs?: number) => {
     if (!isDev) return;
@@ -606,6 +609,10 @@ export default function Home() {
   const [vibeType, setVibeType] = useState<VibeType | null>(null);
   const [budget, setBudget] = useState<Budget | null>(null);
   const [analyzingMessageIndex, setAnalyzingMessageIndex] = useState(0);
+  const [sampleSelectionSource, setSampleSelectionSource] = useState<
+    "landing" | "upload_step" | null
+  >(null);
+  const trySampleClickedRef = useRef(false);
   const hasTrackedResultRef = useRef(false);
   const analyzeStartRef = useRef<number | null>(null);
   const budgetSelectStartRef = useRef<number | null>(null);
@@ -686,25 +693,71 @@ export default function Home() {
     setEventType(null);
     setVibeType(null);
     setBudget(null);
+    setSampleSelectionSource(null);
+    trySampleClickedRef.current = false;
 
     const preview = URL.createObjectURL(file);
     setUploadedImage(preview);
     track("upload_completed", { source: "user_upload" });
   }
 
-  function handleTrySample() {
+  /** Preloads the sample image on Step 1; user confirms before occasion selection. */
+  function preloadSampleItem(selectionSource: "landing" | "upload_step") {
     if (uploadedImage?.startsWith("blob:")) URL.revokeObjectURL(uploadedImage);
     setUploadedImage(USE_LOCAL_SAMPLE_IMAGE ? SAMPLE_IMAGE : SAMPLE_IMAGE_REMOTE);
     setUploadedFile(null);
     setUploadedFileName("Sample black trousers");
     setAiAnalysis(null);
     setIsSampleItem(true);
-    setUploadConfirmed(true);
+    setUploadConfirmed(false);
     setEventType(null);
     setVibeType(null);
     setBudget(null);
-    track("try_sample_clicked", { source: "upload_step" });
+    setSampleSelectionSource(selectionSource);
+    trySampleClickedRef.current = false;
   }
+
+  function handleTrySample() {
+    preloadSampleItem("upload_step");
+  }
+
+  function handleConfirmStep1() {
+    if (isSampleItem && !trySampleClickedRef.current) {
+      trySampleClickedRef.current = true;
+      track("try_sample_clicked", {
+        source: sampleSelectionSource ?? "upload_step",
+      });
+    }
+    setUploadConfirmed(true);
+  }
+
+  useEffect(() => {
+    if (searchParams.get("sample") !== "true") {
+      return;
+    }
+
+    if (
+      uploadedImage !== null ||
+      uploadConfirmed ||
+      eventType ||
+      vibeType ||
+      budget
+    ) {
+      router.replace("/outfit", { scroll: false });
+      return;
+    }
+
+    preloadSampleItem("landing");
+    router.replace("/outfit", { scroll: false });
+  }, [
+    budget,
+    eventType,
+    router,
+    searchParams,
+    uploadConfirmed,
+    uploadedImage,
+    vibeType,
+  ]);
 
   async function handleBudgetSelect(nextBudget: Budget) {
     if (isAnalyzing) return;
@@ -749,6 +802,8 @@ export default function Home() {
     setVibeType(null);
     setBudget(null);
     setAiAnalysis(null);
+    setSampleSelectionSource(null);
+    trySampleClickedRef.current = false;
   }
 
   const stepNumber = !uploadedImage
@@ -969,7 +1024,9 @@ export default function Home() {
             </div>
 
             <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
-              <div className="relative h-60 bg-zinc-950">
+              <div
+                className={`relative bg-zinc-950 ${isSampleItem ? "h-72 sm:h-80" : "h-60"}`}
+              >
                 <img
                   src={uploadedImage}
                   alt="Uploaded clothing item"
@@ -1004,10 +1061,11 @@ export default function Home() {
 
                 <div className="mt-4 grid grid-cols-2 gap-2.5">
                   <button
-                    onClick={() => setUploadConfirmed(true)}
+                    type="button"
+                    onClick={handleConfirmStep1}
                     className="rounded-full border border-white/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-100"
                   >
-                    Looks good → continue
+                    {isSampleItem ? "Continue with this item" : "Looks good → continue"}
                   </button>
 
                   <label className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300 transition hover:border-white/20 hover:text-white">
@@ -1258,7 +1316,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="space-y-4.5">
+                <div className="space-y-5">
                   {outfit.items.map((item: OutfitItem, i: number) => (
                     <div
                       key={i}
@@ -1271,7 +1329,7 @@ export default function Home() {
                           accent={outfit.accentSolid}
                         />
 
-                        <div className="flex-1 p-4.5 sm:p-5.5">
+                        <div className="min-w-0 flex-1 p-5 sm:p-6">
                           <div className="flex items-start justify-between gap-3.5">
                             <div className="space-y-1.5">
                               {item.brand && (
@@ -1411,5 +1469,15 @@ export default function Home() {
         <p className="mt-4 text-center text-[11px] text-zinc-700">© 2026 FitAround</p>
       </footer>
     </main>
+  );
+}
+
+export default function OutfitPage() {
+  return (
+    <Suspense
+      fallback={<main className="min-h-screen bg-[#09090b]" aria-hidden />}
+    >
+      <OutfitFlow />
+    </Suspense>
   );
 }
