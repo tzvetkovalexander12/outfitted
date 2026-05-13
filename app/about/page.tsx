@@ -15,7 +15,7 @@ export default function AboutPage() {
         FitAround helps you build an outfit around one item you already want to wear.
       </p>
       <p>
-        Upload one item, choose the occasion, vibe, and budget, and get matching outfit recommendations built around
+        Upload one item, choose the occasion, fit, and budget, and get matching outfit recommendations built around
         that piece.
       </p>
       <p>No signup is needed, and it is built for quick styling help, not wardrobe management.</p>

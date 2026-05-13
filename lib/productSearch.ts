@@ -1,4 +1,4 @@
-import type { BudgetTier, Product, ProductCategory, ProductRole } from "./products";
+import type { BudgetTier, FitPreference, Product, ProductCategory, ProductRole } from "./products";
 
 export type ProductSearchRequirement = {
   role?: ProductRole;
@@ -6,7 +6,7 @@ export type ProductSearchRequirement = {
   query?: string;
   colors?: string[];
   occasion?: string;
-  vibe?: string;
+  fitPreference?: FitPreference;
   budgetTier?: BudgetTier;
   excludeCategories?: string[];
   limit?: number;
@@ -70,9 +70,14 @@ export function searchProducts(
     );
   }
 
-  if (requirements.vibe) {
-    const vibe = requirements.vibe.toLowerCase();
-    matches = matches.filter((product) => product.vibes.some((value) => value.toLowerCase() === vibe));
+  if (requirements.fitPreference) {
+    const fp = requirements.fitPreference.toLowerCase();
+    const fitMatches = matches.filter((product) =>
+      product.fitPreferences.some((value) => value.toLowerCase() === fp)
+    );
+    if (fitMatches.length > 0) {
+      matches = fitMatches;
+    }
   }
 
   return shuffle(matches).slice(0, limit);

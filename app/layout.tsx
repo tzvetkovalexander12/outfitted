@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FitAround | AI Outfit Matching",
   description:
-    "Upload one clothing item and get outfit recommendations styled around your occasion, vibe, and budget.",
+    "Upload one clothing item and get outfit recommendations styled around your occasion, fit, and budget.",
   icons: {
     icon: "/icon.svg",
   },

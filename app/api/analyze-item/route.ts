@@ -40,15 +40,15 @@ export async function POST(req: Request) {
 
     const image = formData.get("image");
     const rawEventType = formData.get("eventType");
-    const rawVibeType = formData.get("vibeType");
+    const rawFitPreference = formData.get("fitPreferenceType");
     const eventType =
       typeof rawEventType === "string" && rawEventType.trim().length > 0
         ? rawEventType.trim()
         : "casual-day";
-    const vibeType =
-      typeof rawVibeType === "string" && rawVibeType.trim().length > 0
-        ? rawVibeType.trim()
-        : "minimal";
+    const fitPreferenceType =
+      typeof rawFitPreference === "string" && rawFitPreference.trim().length > 0
+        ? rawFitPreference.trim()
+        : "relaxed";
 
     if (!image || !(image instanceof File)) {
       return NextResponse.json({ error: "No image" }, { status: 400 });
@@ -79,8 +79,8 @@ Analyze this clothing item for a men's outfit matching app.
 The user uploaded one clothing item.
 They are dressing for:
 EVENT: ${eventType}
-They want the vibe:
-VIBE: ${vibeType}
+They want this fit preference:
+FIT: ${fitPreferenceType}
 
 Human intent:
 People want to look good, avoid awkwardness, and feel confident in the situation — not just coordinate colors.
@@ -96,7 +96,7 @@ Effort balance:
 - Piece reads plain → add interest via silhouette, texture, shoes, or layering — usually ONE lead area; the rest supports.
 
 Social risk:
-Unless VIBE is "bold" or "expensive-looking", avoid styling that is trendy-but-risky for normal plans (costume-y, try-hard flash, extreme proportions). Keep looks wearable in real life.
+Unless FIT is "baggy", avoid styling that is trendy-but-risky for normal plans (costume-y, try-hard flash, extreme proportions). Keep looks wearable in real life.
 
 First, choose exactly ONE "outfitDirection" from these three strings only:
 - "casual clean"
@@ -111,18 +111,17 @@ Event meaning:
 - vacation: relaxed, breathable, low-effort — practical ease
 - date: attractive and intentional — confident, not desperate or overdressed
 
-Vibe meaning:
-- safe: clean and wearable — not boring; dependable but still intentional
-- minimal: intentional restraint — not plain; fewer variables, clearer shapes
-- bold: one or two strong choices — not chaos; the rest supports the lead
-- expensive-looking: cleaner shape, better texture, less visual noise — not flashy logos or gimmicks
+Fit preference meaning (silhouette and proportion — not budget, not "loud vs quiet"):
+- clean: sharper, neater, more put-together; cleaner proportions; avoid overly oversized pieces and messy layering. Clean does NOT mean skin-tight or skinny-everything.
+- relaxed: easy, comfortable, regular fit; casual but still intentional; not too tight and not too baggy.
+- baggy: looser, wider, streetwear/skate-inspired; oversized layers and chunkier shoes can work; avoid skinny/tight recommendations; keep the outfit intentional and balanced — not random oversized everything.
 
 How to choose outfitDirection:
 - Return outfitDirection as exactly one of: "casual clean", "smart casual", "evening polished".
 - casual-day and vacation often lean "casual clean".
 - dinner, date, and work often lean "smart casual".
-- party and expensive-looking can lean "evening polished".
-- Do not force this mapping. Pick what best fits the uploaded item + event + vibe.
+- party and FIT "clean" can lean "evening polished".
+- Do not force this mapping. Pick what best fits the uploaded item + event + fit preference.
 
 The recommendedPieces array MUST only use these exact lowercase strings (no other values):
 ${ALLOWED_CATEGORIES}
@@ -130,7 +129,7 @@ ${ALLOWED_CATEGORIES}
 recommendedPieces must:
 - match the uploaded item
 - match the event
-- match the vibe
+- match the fit preference (silhouette and proportion)
 - NOT be the same type of item as the uploaded item
 - include 3 pieces maximum
 - only use exact allowed category values
@@ -139,14 +138,14 @@ Finishing accessories ("minimal accessory") — jewelry, sunglasses, small detai
 
 When to PUSH subtle jewelry / accessories:
 - EVENT is "date", "dinner", or "party": subtle chains, bracelets, watches, rings, or sunglasses are natural finishing touches once tops/bottoms/shoes are covered.
-- Hoodie/sweatshirt + EVENT "party" + VIBE "bold" or "expensive-looking": prefer a premium "minimal accessory" as the third piece over "blazer" when black jeans/dark trousers + chelsea boots or strong sneakers already sharpen the outfit — nightlife-ready polish, not suit layers.
-- VIBE is "expensive-looking": accessories read as intentional polish.
-- VIBE is "minimal" when the outfit is already clean and the core pieces are set.
+- Hoodie/sweatshirt + EVENT "party" + FIT "baggy" or "clean": prefer a premium "minimal accessory" as the third piece over "blazer" when black jeans/dark trousers + chelsea boots or strong sneakers already sharpen the outfit — nightlife-ready polish, not suit layers.
+- FIT "clean": accessories read as intentional polish when the core outfit is already set.
+- FIT "relaxed" when the outfit is already balanced and the core pieces are set.
 
 When to REDUCE jewelry / "minimal accessory" as the default third piece:
 - EVENT is "casual-day", "work", or "vacation": do NOT default the third slot to a ring/jewelry item if overshirt, oxford shirt, blazer (when appropriate), chinos, jeans, tailored trousers, white sneakers, black sneakers, loafers, or chelsea boots would complete the outfit better.
-- casual-day + VIBE "safe" or "bold": strongly avoid "minimal accessory" as the third piece unless no stronger allowed category applies.
-- casual-day: only use "minimal accessory" when (a) VIBE is "minimal" or "expensive-looking" AND the first two recommended pieces already anchor bottom + shoes (or equivalent strong core), OR (b) no better clothing/shoe/layer option exists from the allowed list.
+- casual-day + FIT "relaxed" or "baggy": strongly avoid "minimal accessory" as the third piece unless no stronger allowed category applies.
+- casual-day: only use "minimal accessory" when (a) FIT is "clean" AND the first two recommended pieces already anchor bottom + shoes (or equivalent strong core), OR (b) no better clothing/shoe/layer option exists from the allowed list.
 - work / vacation: prioritize practical layers and footwear; jewelry only when it clearly elevates without replacing a needed garment or shoe.
 
 Belts: never default to a belt. Prefer chain, bracelet, watch, ring, or sunglasses when choosing "minimal accessory".
@@ -164,53 +163,46 @@ Special hoodie/sweatshirt guidance:
 
 Hoodie/sweatshirt + date general rule:
 - The look should feel relaxed but intentional, not like basic casual-day.
-- Avoid "blue jeans" unless VIBE is "safe" and affordability is important.
+- Avoid "blue jeans" unless FIT is "relaxed" and affordability is important.
 - Prefer "black jeans" or "tailored trousers" for the lower half.
 - Prefer "white sneakers", "black sneakers", or "chelsea boots" first; add subtle jewelry/sunglasses as a date-night finishing touch when the outfit already has strong trousers/shoes.
 - Do not overuse belts as the default third item.
 
 Hoodie + overshirt rule:
-- Hoodie + "overshirt" is usually good for casual-day, vacation, safe, and minimal.
+- Hoodie + "overshirt" is usually good for casual-day, vacation, relaxed, and clean fits.
 
 Hoodie + blazer rule (blazers are rare — accessories often win):
 - Prefer "minimal accessory" (silver chain, bracelet, ring, watch, subtle necklace) as the third piece when the first two pieces already cover a sharp bottom + strong shoes — especially for nightlife/party.
-- For EVENT "party" with VIBE "bold" or "expensive-looking": STRONGLY prefer "minimal accessory" over "blazer" as the third piece. Target look: polished off-duty, sharp but casual, intentional, not formal, not business-like.
+- For EVENT "party" with FIT "baggy" or "clean": STRONGLY prefer "minimal accessory" over "blazer" as the third piece. Target look: polished off-duty, sharp but casual, intentional, not formal, not business-like.
 - Default party structure for hoodies: sharper bottom ("black jeans", dark jeans, or dark trousers) + stronger shoe ("chelsea boots", "black sneakers", or premium sneakers) + "minimal accessory". Avoid hoodie + suit-like blazer as the default.
 - Do NOT default to "blazer" for hoodie + party when jewelry would finish the outfit more naturally. Avoid wool-linen suit tailoring, stiff suit blazers, or office/business blazers over a hoodie.
-- Only recommend "blazer" with a hoodie when EVENT is "date", "party", or "dinner" AND VIBE is "bold" or "expensive-looking" AND you need a soft, unstructured, casual layer — not when an accessory is the stronger third piece.
+- Only recommend "blazer" with a hoodie when EVENT is "date", "party", or "dinner" AND FIT is "baggy" or "clean" AND you need a soft, unstructured, casual layer — not when an accessory is the stronger third piece.
 - If you use "blazer" with a hoodie, it must read relaxed-sharp and off-duty (soft or unstructured), never corporate.
 
 Black or dark hoodie + bottoms (important):
 - Prefer darker, cleaner bottoms first: "black jeans", neutral/dark "tailored trousers", navy or charcoal "chinos". Avoid pale linen or ecru trousers as the default — they are for warm-weather contexts.
-- For EVENT "date" with VIBE "minimal", strongly prefer "black jeans" or dark/neutral tailored bottoms before light linen-style trousers.
-- Light linen / airy tailored trousers belong when EVENT is "vacation" or "casual-day", or for "dinner" with VIBE "expensive-looking" (warm polished evening). Not the default for date + minimal.
+- For EVENT "date" with FIT "clean", strongly prefer "black jeans" or dark/neutral tailored bottoms before light linen-style trousers.
+- Light linen / airy tailored trousers belong when EVENT is "vacation" or "casual-day", or for "dinner" with FIT "clean" (warm polished evening). Not the default for date + clean.
 
-Hoodie/sweatshirt + date vibe-specific patterns:
-- safe:
+Hoodie/sweatshirt + date fit-specific patterns:
+- relaxed:
   - usually: "black jeans" + ("white sneakers" or "black sneakers") + "minimal accessory"
-  - safe should feel easy, wearable, low-risk, and cleaner than casual-day.
-- minimal:
+  - relaxed should feel easy, wearable, low-risk, and cleaner than casual-day.
+- clean:
   - usually: prefer "black jeans" for black/dark hoodies; otherwise ("black jeans" or dark/neutral "tailored trousers") + "white sneakers" + "minimal accessory"
-  - minimal should feel clean, simple, tonal, and not over-styled.
-- bold:
+  - clean should feel neat, simple, tonal, and not over-styled.
+- baggy:
   - For EVENT "party": usually "black jeans" + "chelsea boots" + "minimal accessory" — prefer this over "blazer" for hoodie/sweatshirt uploads.
   - Otherwise: "black jeans" + "chelsea boots" + ("minimal accessory" first; "blazer" only if a soft layer is clearly needed over jewelry).
-  - bold should add stronger silhouette or contrast, not just trousers + belt.
-- expensive-looking:
-  - For EVENT "party" with hoodie: dark bottom + "chelsea boots" + "minimal accessory" — avoid suit-like "blazer" unless accessory cannot complete the look.
-  - Otherwise: dark/neutral "tailored trousers" + "chelsea boots" + ("minimal accessory" preferred over "blazer" for hoodies).
-  - should feel tonal, polished, refined — still relaxed-sharp, not a suit costume.
-  - prefer black chelsea boots with a black hoodie unless the outfit is clearly warm/neutral.
-  - avoid light linen-looking tailored trousers with a black/dark hoodie unless EVENT is "vacation", "casual-day", or warm-evening "dinner" with this vibe.
+  - baggy should add stronger width and proportion play, not just trousers + belt.
 
-Vibe differentiation rule:
-- For the same uploaded item + same event, outputs across vibes must be clearly different.
+Fit differentiation rule:
+- For the same uploaded item + same event, outputs across fit preferences (clean vs relaxed vs baggy) must be clearly different in silhouette and recommended categories where possible.
 - For hoodie + date + mid-range, keep this differentiation:
-  - safe: black jeans + white sneakers + minimal accessory
-  - minimal: tailored trousers or black jeans + white sneakers + minimal accessory
-  - bold: black jeans + chelsea boots + minimal accessory (prefer over blazer)
-  - expensive-looking: tailored trousers + chelsea boots + minimal accessory (prefer over blazer)
-- For hoodie + party + bold or expensive-looking + premium/mid: third piece should usually be "minimal accessory", not "blazer".
+  - relaxed: black jeans + white sneakers + minimal accessory
+  - clean: tailored trousers or black jeans + white sneakers + minimal accessory
+  - baggy: black jeans + chelsea boots + minimal accessory (prefer over blazer)
+- For hoodie + party + baggy or clean + premium/mid: third piece should usually be "minimal accessory", not "blazer".
 
 Reminder: follow "Finishing accessories" rules above — especially casual-day vs date/dinner/party.
 
@@ -228,7 +220,7 @@ Keep "reason" to 1-2 short sentences max. It becomes the user's stylist directio
 
 Include where natural: what the uploaded item naturally feels like, what the outfit improves or balances, how EVENT changes the styling, and why the wearer would feel confident — without sounding like an essay.
 
-Forbidden weak filler (never use): phrases like "matches your outfit", "great for your style", "versatile choice", "perfect for the vibe", or empty praise.
+Forbidden weak filler (never use): phrases like "matches your outfit", "great for your style", "versatile choice", "perfect for the look", or empty praise.
 Instead say what a piece DOES (sharpens the lower half, adds polish without formality, keeps focus on the uploaded item, balances proportion).
 
 Response style and concision rules (strict):
@@ -273,7 +265,7 @@ Bad: "This matches your outfit."
 If the uploaded item is a hoodie or sweatshirt and EVENT is "date", the reason should explicitly mention:
 - the hoodie keeps a relaxed base
 - which piece(s) sharpen or clean up the outfit for date context
-- how this supports the selected vibe
+- how this supports the selected fit preference
 - avoiding a too-basic casual look
 
 Do not give generic advice like "these colors match". Explain silhouette, contrast, formality, occasion, and why the pieces work around the uploaded item.

@@ -2,7 +2,7 @@ export type StylingContext = {
   uploadedItemType?: string;
   uploadedItemColor?: string;
   occasion?: string;
-  vibe?: string;
+  fitPreference?: string;
   budget?: string;
   selectedCategories?: string[];
   aiReason?: string;
@@ -31,7 +31,7 @@ export function getStylistDirection(context: StylingContext): string {
 
   const itemType = normalize(context.uploadedItemType) || "uploaded piece";
   const occasion = normalize(context.occasion);
-  const vibe = normalize(context.vibe);
+  const fit = normalize(context.fitPreference);
   const hoodieBase = isHoodieItem(context.uploadedItemType);
   const itemColor = normalize(context.uploadedItemColor);
   const hasTailoredTrousers = (context.selectedCategories ?? []).some(
@@ -49,17 +49,17 @@ export function getStylistDirection(context: StylingContext): string {
   }
   if (
     hoodieBase &&
-    (occasion === "casual-day" || occasion === "vacation" || vibe === "safe" || vibe === "minimal")
+    (occasion === "casual-day" || occasion === "vacation" || fit === "relaxed" || fit === "clean")
   ) {
     return "This keeps the hoodie easy and wearable, then cleans up the surrounding pieces. The result feels relaxed-sharp, intentional, and more considered than a basic hoodie combo.";
   }
   if (occasion === "vacation") {
     return "This leans relaxed and breathable — comfort-first pieces that still read considered when you are away from home.";
   }
-  if (vibe === "expensive-looking") {
+  if (fit === "clean") {
     return `This leans into a cleaner, sharper version of your ${itemType}. The outfit uses better shape and restraint so it feels polished without looking overdone.`;
   }
-  if (vibe === "bold") {
+  if (fit === "baggy") {
     return `Your ${itemType} sets the base, then one stronger piece drives the look. The rest is kept clean so the outfit feels confident, styled, and easy to wear.`;
   }
 
@@ -68,7 +68,7 @@ export function getStylistDirection(context: StylingContext): string {
 
 export function getStylingContrastNote(context: StylingContext): string | null {
   const occasion = normalize(context.occasion);
-  const vibe = normalize(context.vibe);
+  const fit = normalize(context.fitPreference);
   const hoodieBase = isHoodieItem(context.uploadedItemType);
   const itemColor = normalize(context.uploadedItemColor);
   const hasTailoredTrousers = (context.selectedCategories ?? []).some(
@@ -87,14 +87,14 @@ export function getStylingContrastNote(context: StylingContext): string | null {
     }
     return "Blue jeans would work, but they can read too basic here. A darker or sharper lower half keeps the hoodie casual while making the whole look more intentional.";
   }
-  if (hoodieBase && vibe === "expensive-looking") {
+  if (hoodieBase && fit === "clean") {
     return "The point is not to make the hoodie formal. It is cleaner contrast so the outfit feels intentional and relaxed-sharp.";
   }
-  if (vibe === "minimal") {
-    return "Minimal does not mean plain. The outfit relies on cleaner shapes and fewer distractions.";
+  if (fit === "clean") {
+    return "Clean does not mean plain. The outfit relies on cleaner shapes and fewer distractions.";
   }
-  if (vibe === "bold") {
-    return "Bold works best when one or two pieces lead the outfit. The rest should support the statement instead of competing.";
+  if (fit === "baggy") {
+    return "Looser fits work best when one or two pieces lead the outfit. The rest should support the statement instead of competing.";
   }
   if (occasion === "vacation") {
     return "Vacation calls for relaxed structure and easy layers — pieces that feel breathable and low-effort without looking careless.";
@@ -105,22 +105,22 @@ export function getStylingContrastNote(context: StylingContext): string | null {
 
 export function getUpgradeMove(context: StylingContext): string | null {
   const occasion = normalize(context.occasion);
-  const vibe = normalize(context.vibe);
+  const fit = normalize(context.fitPreference);
   const hoodieBase = isHoodieItem(context.uploadedItemType);
 
   if (hoodieBase && (occasion === "date" || occasion === "dinner")) {
     return "Swap clean sneakers for Chelsea boots if you want the outfit to feel more date-night ready.";
   }
-  if (hoodieBase && (occasion === "casual-day" || vibe === "safe" || vibe === "minimal")) {
+  if (hoodieBase && (occasion === "casual-day" || fit === "relaxed" || fit === "clean")) {
     return "Add an overshirt if you want the hoodie to feel more layered and intentional.";
   }
-  if (vibe === "minimal") {
+  if (fit === "clean") {
     return "Keep accessories small. One clean watch or simple chain is enough.";
   }
-  if (vibe === "expensive-looking") {
-    return "Choose cleaner textures and sharper shoes before adding loud pieces.";
+  if (fit === "relaxed") {
+    return "Try a slightly roomier layer or softer shoe if the outfit starts to feel too stiff.";
   }
-  if (occasion === "party" || vibe === "bold") {
+  if (occasion === "party" || fit === "baggy") {
     return "Let one piece carry the attention, then keep the rest clean.";
   }
 
@@ -131,7 +131,7 @@ function getCategoryRoleNote(context: ProductNoteContext): string | null {
   const category = normalize(context.category);
   const hoodieBase = isHoodieItem(context.uploadedItemType);
   const occasion = normalize(context.occasion);
-  const vibe = normalize(context.vibe);
+  const fit = normalize(context.fitPreference);
   const affordable = normalize(context.budget) === "affordable";
 
   if (category === "black jeans") {
@@ -141,10 +141,10 @@ function getCategoryRoleNote(context: ProductNoteContext): string | null {
     return "Sharpens the lower half while keeping the outfit easy to wear.";
   }
   if (category === "blue jeans") {
-    if (hoodieBase && occasion !== "casual-day" && !(vibe === "safe" && affordable)) {
+    if (hoodieBase && occasion !== "casual-day" && !(fit === "relaxed" && affordable)) {
       return "Blue denim keeps this more familiar, but it is softer than the sharper options for this direction.";
     }
-    return "Keeps the look casual and familiar. Best when the outfit direction is safe or relaxed.";
+    return "Keeps the look casual and familiar. Best when the outfit direction is easy or relaxed.";
   }
   if (category === "tailored trousers") {
     if (hoodieBase)
@@ -190,7 +190,7 @@ function getCategoryRoleNote(context: ProductNoteContext): string | null {
       return "Gives the outfit a sharper party detail while keeping it relaxed.";
     }
     if (occasion === "casual-day") {
-      if (vibe === "minimal" || vibe === "expensive-looking") {
+      if (fit === "clean" || fit === "relaxed") {
         return "Keeps the look simple while adding a little finish.";
       }
       return "A small extra detail if the rest of the outfit is already clean.";

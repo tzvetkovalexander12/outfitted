@@ -19,6 +19,7 @@ export type ProductCategory =
 
 export type Budget = "affordable" | "mid" | "premium";
 export type BudgetTier = Budget;
+export type FitPreference = "clean" | "relaxed" | "baggy";
 export type ProductSource = "manual" | "feed" | "api" | "scrape";
 export type ProductRole = "top" | "bottom" | "shoes" | "layer" | "outerwear" | "accessory";
 
@@ -46,7 +47,7 @@ export interface ExternalProduct {
   budgetTier?: BudgetTier;
   colors?: string[];
   occasions?: string[];
-  vibes?: string[];
+  fitPreferences?: FitPreference[];
   styleTags?: string[];
   source?: ProductSource;
 }
@@ -69,7 +70,7 @@ export interface Product {
   budget: Budget;
   colors: string[];
   occasions: string[];
-  vibes: string[];
+  fitPreferences: FitPreference[];
   styleTags: string[];
   source: ProductSource;
   region: "Europe";
@@ -171,13 +172,38 @@ function inferOccasions(category: ProductCategory): string[] {
   return ["casual-day", "vacation", "date", "dinner"];
 }
 
-function inferVibes(category: ProductCategory): string[] {
-  if (category === "blazer" || category === "chelsea boots" || category === "tailored trousers") {
-    return ["bold", "expensive-looking", "minimal"];
+function inferFitPreferences(category: ProductCategory): FitPreference[] {
+  if (category === "tailored trousers" || category === "loafers" || category === "chelsea boots") {
+    return ["clean"];
   }
-  if (category === "minimal accessory") return ["minimal", "bold", "expensive-looking", "safe"];
-  if (category === "blue jeans" || category === "hoodie") return ["safe", "minimal"];
-  return ["safe", "minimal", "bold"];
+  if (category === "blazer" || category === "oxford shirt") {
+    return ["clean", "relaxed"];
+  }
+  if (category === "minimal accessory") {
+    return ["clean", "relaxed"];
+  }
+  if (category === "white sneakers") {
+    return ["clean", "relaxed"];
+  }
+  if (category === "black sneakers") {
+    return ["relaxed", "baggy"];
+  }
+  if (category === "hoodie") {
+    return ["relaxed", "baggy"];
+  }
+  if (category === "overshirt") {
+    return ["relaxed", "clean", "baggy"];
+  }
+  if (category === "chinos") {
+    return ["clean", "relaxed"];
+  }
+  if (category === "blue jeans" || category === "black jeans") {
+    return ["clean", "relaxed", "baggy"];
+  }
+  if (category === "white t-shirt" || category === "black t-shirt") {
+    return ["clean", "relaxed", "baggy"];
+  }
+  return ["clean", "relaxed"];
 }
 
 function inferStyleTags(product: ExternalProduct): string[] {
@@ -213,7 +239,10 @@ export function normalizeProduct(external: ExternalProduct): Product {
     budgetTier: external.budgetTier ?? external.budget,
     colors: external.colors ?? inferColors(external),
     occasions: external.occasions ?? inferOccasions(external.category),
-    vibes: external.vibes ?? inferVibes(external.category),
+    fitPreferences:
+      external.fitPreferences && external.fitPreferences.length > 0
+        ? external.fitPreferences
+        : inferFitPreferences(external.category),
     styleTags: external.styleTags ?? inferStyleTags(external),
     source: external.source ?? "manual",
   };
@@ -1042,7 +1071,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["black", "brown"],
     occasions: ["casual-day", "party", "dinner", "date"],
-    vibes: ["bold", "safe"],
+    fitPreferences: ["relaxed", "baggy"],
     styleTags: ["check", "boxy", "casual", "statement-light"],
     budgetTier: "mid",
   },
@@ -1062,7 +1091,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["ecru", "green"],
     occasions: ["casual-day", "vacation", "dinner", "date"],
-    vibes: ["minimal", "expensive-looking", "safe"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["seersucker", "textured", "summer", "smart-casual"],
     budgetTier: "mid",
   },
@@ -1082,7 +1111,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["neutral"],
     occasions: ["casual-day", "vacation", "dinner", "date"],
-    vibes: ["minimal", "safe", "expensive-looking"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["seersucker", "textured", "smart-casual"],
     budgetTier: "mid",
   },
@@ -1102,7 +1131,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["grey"],
     occasions: ["casual-day", "date", "party"],
-    vibes: ["minimal", "safe", "bold"],
+    fitPreferences: ["relaxed", "clean", "baggy"],
     styleTags: ["harrington", "ribbed", "casual layer", "relaxed"],
     budgetTier: "affordable",
   },
@@ -1122,7 +1151,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["light beige"],
     occasions: ["casual-day", "vacation", "date"],
-    vibes: ["minimal", "safe", "expensive-looking"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["linen-blend", "lightweight", "summer", "easy structure"],
     budgetTier: "affordable",
   },
@@ -1142,7 +1171,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["neutral"],
     occasions: ["casual-day", "vacation", "date"],
-    vibes: ["minimal", "safe"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["linen-blend", "lightweight", "easy structure"],
     budgetTier: "affordable",
   },
@@ -1162,7 +1191,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["brown"],
     occasions: ["casual-day", "date", "dinner"],
-    vibes: ["minimal", "expensive-looking", "bold"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["cropped", "structured", "smart-casual", "light layer"],
     budgetTier: "mid",
   },
@@ -1182,7 +1211,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["blue"],
     occasions: ["casual-day", "party", "date"],
-    vibes: ["safe", "bold", "minimal"],
+    fitPreferences: ["relaxed", "baggy", "clean"],
     styleTags: ["denim", "zip-up", "casual layer"],
     budgetTier: "mid",
   },
@@ -1202,7 +1231,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["white"],
     occasions: ["casual-day", "date", "dinner", "vacation"],
-    vibes: ["minimal", "expensive-looking", "safe"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["clean", "leather", "premium sneaker", "minimal"],
     budgetTier: "premium",
   },
@@ -1222,7 +1251,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["black"],
     occasions: ["casual-day", "date", "dinner", "party"],
-    vibes: ["safe", "minimal", "bold"],
+    fitPreferences: ["clean", "relaxed", "baggy"],
     styleTags: ["tapered", "clean black denim", "casual sharp"],
     budgetTier: "affordable",
   },
@@ -1242,7 +1271,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["black"],
     occasions: ["dinner", "date", "work", "party"],
-    vibes: ["minimal", "expensive-looking", "safe"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["smart", "straight", "clean lower half", "relaxed-sharp"],
     budgetTier: "affordable",
   },
@@ -1262,7 +1291,7 @@ export const PRODUCTS: ExternalProduct[] = [
     isAffiliate: false,
     colors: ["black"],
     occasions: ["casual-day", "date", "dinner", "party"],
-    vibes: ["minimal", "expensive-looking", "safe"],
+    fitPreferences: ["clean", "relaxed"],
     styleTags: ["straight-leg", "premium denim", "clean", "minimal"],
     budgetTier: "premium",
   },
@@ -1275,7 +1304,7 @@ export type OutfitRecommendationContext = {
   uploadedItemType?: string;
   uploadedItemColor?: string;
   occasion?: string;
-  vibe?: string;
+  fitPreference?: string;
 };
 
 function normalizeCtx(s?: string): string {
@@ -1321,19 +1350,19 @@ function isLightBeigeChino(product: Product): boolean {
   );
 }
 
-function allowsWarmWeatherLightBottoms(occasion?: string, vibe?: string): boolean {
+function allowsWarmWeatherLightBottoms(occasion?: string, fitPreference?: string): boolean {
   const o = normalizeCtx(occasion);
-  const v = normalizeCtx(vibe);
+  const f = normalizeCtx(fitPreference);
   if (o === "vacation") return true;
   if (o === "casual-day") return true;
-  if (o === "dinner" && v === "expensive-looking") return true;
+  if (o === "dinner" && f === "clean") return true;
   return false;
 }
 
 function shouldDeferLightBottomsForDarkHoodie(ctx?: OutfitRecommendationContext): boolean {
   if (!ctx) return false;
   if (!isDarkHoodieUpload(ctx.uploadedItemType, ctx.uploadedItemColor)) return false;
-  if (allowsWarmWeatherLightBottoms(ctx.occasion, ctx.vibe)) return false;
+  if (allowsWarmWeatherLightBottoms(ctx.occasion, ctx.fitPreference)) return false;
   return true;
 }
 
@@ -1377,6 +1406,7 @@ export function getProductsForCategories(
       {
         category,
         budgetTier: budget,
+        fitPreference: context?.fitPreference,
         limit: 8,
       },
       NORMALIZED_PRODUCTS

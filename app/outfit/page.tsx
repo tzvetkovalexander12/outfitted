@@ -4,7 +4,7 @@ import Link from "next/link";
 import { track } from "@vercel/analytics";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { getProductsForCategories } from "../../lib/products";
+import { getProductsForCategories, type FitPreference } from "../../lib/products";
 import {
   getProductStylistNote,
   getStylingContrastNote,
@@ -21,8 +21,6 @@ type EventType =
   | "work"
   | "vacation"
   | "date";
-
-type VibeType = "safe" | "minimal" | "bold" | "expensive-looking";
 
 type OutfitDirection = "casual clean" | "smart casual" | "evening polished";
 
@@ -71,7 +69,7 @@ interface OutfitItem {
 interface Outfit {
   title: string;
   description: string;
-  vibe: string;
+  tagline: string;
   estimatedTotal: string;
   accent: string;
   accentSolid: string;
@@ -93,7 +91,7 @@ const SAMPLE_IMAGE_REMOTE =
 
 function getSampleAnalysis(
   eventType?: EventType | null,
-  vibeType?: VibeType | null,
+  fitPreference?: FitPreference | null,
   _budget?: Budget | null
 ): AIAnalysis {
   const base: Pick<AIAnalysis, "itemType" | "mainColor" | "style"> = {
@@ -102,7 +100,7 @@ function getSampleAnalysis(
     style: "wide-leg, clean, smart-casual",
   };
 
-  if ((eventType === "dinner" || eventType === "date") && vibeType === "expensive-looking") {
+  if ((eventType === "dinner" || eventType === "date") && fitPreference === "clean") {
     return {
       ...base,
       outfitDirection: "evening polished",
@@ -112,7 +110,7 @@ function getSampleAnalysis(
     };
   }
 
-  if ((eventType === "dinner" || eventType === "date") && vibeType === "minimal") {
+  if ((eventType === "dinner" || eventType === "date") && fitPreference === "relaxed") {
     return {
       ...base,
       outfitDirection: "smart casual",
@@ -122,7 +120,7 @@ function getSampleAnalysis(
     };
   }
 
-  if (eventType === "party" && vibeType === "bold") {
+  if (eventType === "party" && fitPreference === "baggy") {
     return {
       ...base,
       outfitDirection: "evening polished",
@@ -164,7 +162,7 @@ function getSampleAnalysis(
 const OUTFITS: OutfitMap = {
   affordable: {
     title: "Easy Everyday Match",
-    vibe: "Relaxed, clean, hard to get wrong.",
+    tagline: "Relaxed, clean, hard to get wrong.",
     estimatedTotal: "~€50",
     accent: "from-stone-400/30 via-zinc-600/20 to-zinc-800/30",
     accentSolid: "from-stone-300 via-zinc-400 to-zinc-600",
@@ -199,7 +197,7 @@ const OUTFITS: OutfitMap = {
   },
   mid: {
     title: "Refined Everyday Match",
-    vibe: "A little sharper, still effortless.",
+    tagline: "A little sharper, still effortless.",
     estimatedTotal: "~€175",
     accent: "from-blue-900/30 via-slate-700/20 to-stone-800/30",
     accentSolid: "from-slate-300 via-stone-400 to-slate-600",
@@ -242,7 +240,7 @@ const OUTFITS: OutfitMap = {
   },
   premium: {
     title: "Quiet Luxury Match",
-    vibe: "Subtle, sharp, expensive-looking.",
+    tagline: "Subtle, sharp, elevated.",
     estimatedTotal: "~€520",
     accent: "from-amber-900/30 via-stone-700/20 to-neutral-900/30",
     accentSolid: "from-amber-200 via-stone-400 to-neutral-600",
@@ -371,40 +369,33 @@ const EVENT_OPTIONS: {
   },
 ];
 
-const VIBE_OPTIONS: {
-  value: VibeType;
+const FIT_OPTIONS: {
+  value: FitPreference;
   label: string;
   sub: string;
   accent: string;
   dot: string;
 }[] = [
   {
-    value: "safe",
-    label: "Safe",
-    sub: "Reliable and easy to wear.",
-    accent: "hover:border-stone-500/40 hover:bg-stone-900/30",
-    dot: "bg-stone-400",
-  },
-  {
-    value: "minimal",
-    label: "Minimal",
-    sub: "Clean, simple, understated.",
+    value: "clean",
+    label: "Clean",
+    sub: "Sharper and more put-together",
     accent: "hover:border-slate-500/40 hover:bg-slate-900/30",
     dot: "bg-slate-400",
   },
   {
-    value: "bold",
-    label: "Bold",
-    sub: "More contrast and personality.",
-    accent: "hover:border-fuchsia-600/40 hover:bg-fuchsia-950/20",
-    dot: "bg-fuchsia-400",
+    value: "relaxed",
+    label: "Relaxed",
+    sub: "Easy fit, still intentional",
+    accent: "hover:border-stone-500/40 hover:bg-stone-900/30",
+    dot: "bg-stone-400",
   },
   {
-    value: "expensive-looking",
-    label: "Expensive-looking",
-    sub: "Polished without being loud.",
-    accent: "hover:border-amber-600/40 hover:bg-amber-950/20",
-    dot: "bg-amber-400",
+    value: "baggy",
+    label: "Baggy",
+    sub: "Looser, wider, more streetwear",
+    accent: "hover:border-fuchsia-600/40 hover:bg-fuchsia-950/20",
+    dot: "bg-fuchsia-400",
   },
 ];
 
@@ -417,25 +408,21 @@ const EVENT_LABELS: Record<EventType, string> = {
   date: "Date",
 };
 
-const VIBE_LABELS: Record<VibeType, string> = {
-  safe: "Safe",
-  minimal: "Minimal",
-  bold: "Bold",
-  "expensive-looking": "Expensive-looking",
+const FIT_LABELS: Record<FitPreference, string> = {
+  clean: "Clean",
+  relaxed: "Relaxed",
+  baggy: "Baggy",
 };
 
 const ANALYZING_MESSAGES = [
   "Reading your item...",
   "Detecting colour and shape...",
-  "Matching occasion and vibe...",
+  "Matching occasion and fit...",
   "Finding pieces that work...",
   "Building your outfit...",
 ] as const;
 
-function getAllowedBudgets(vibeType: VibeType | null): Budget[] {
-  if (vibeType === "expensive-looking" || vibeType === "bold") {
-    return ["mid", "premium"];
-  }
+function getAllowedBudgets(_fitPreference: FitPreference | null): Budget[] {
   return ["affordable", "mid", "premium"];
 }
 
@@ -456,7 +443,7 @@ function buildResultNote(budget: Budget) {
 function resolveOutfitResultTitle(
   directionRaw: string | undefined | null,
   eventType: EventType | null,
-  vibeType: VibeType | null,
+  fitPreference: FitPreference | null,
   budget: Budget,
   itemType: string | undefined | null
 ): string | null {
@@ -464,10 +451,10 @@ function resolveOutfitResultTitle(
 
   const direction = normalizeOutfitDirection(directionRaw);
   const occ = eventType;
-  const v = vibeType;
+  const f = fitPreference;
   const item = (itemType ?? "").toLowerCase();
 
-  if (!occ || !v) return null;
+  if (!occ || !f) return null;
 
   const isHoodie = item.includes("hoodie") || item.includes("sweatshirt");
   const isWhiteTee =
@@ -480,16 +467,16 @@ function resolveOutfitResultTitle(
     (item.includes("jean") &&
       (item.includes("blue") || item.includes("indigo") || item.includes("light wash")));
 
-  if (occ === "date" && v === "minimal" && isBlueJeans) {
+  if (occ === "date" && f === "clean" && isBlueJeans) {
     return budget === "premium" ? "Sharp casual date" : "Clean date-night casual";
   }
 
-  if (occ === "dinner" && v === "expensive-looking" && budget === "premium") {
+  if (occ === "dinner" && f === "clean" && budget === "premium") {
     if (isWhiteTee) return "Polished T-shirt dinner";
     return "Elevated evening casual";
   }
 
-  if (occ === "dinner" && v === "expensive-looking" && budget === "mid") {
+  if (occ === "dinner" && f === "clean" && budget === "mid") {
     if (isWhiteTee) return "Refined off-duty dinner";
     return "Refined dinner look";
   }
@@ -505,12 +492,12 @@ function resolveOutfitResultTitle(
   if (occ === "date") {
     if (direction === "evening polished") return "Polished casual date";
     if (direction === "smart casual") return "Sharp casual date";
-    if (v === "minimal") return "Minimal date fit";
+    if (f === "clean") return "Clean date look";
     return "Clean date-night casual";
   }
 
   if (occ === "dinner") {
-    if (v === "expensive-looking") return "Polished dinner base";
+    if (f === "clean") return "Polished dinner base";
     if (direction === "evening polished") return "Refined dinner look";
     return "Clean evening fit";
   }
@@ -549,7 +536,7 @@ function resolveOutfitResultTitle(
 function buildOutfitFormula(
   aiAnalysis: AIAnalysis | null,
   eventType: EventType | null,
-  vibeType: VibeType | null
+  fitPreference: FitPreference | null
 ): string {
   const direction = normalizeOutfitDirection(aiAnalysis?.outfitDirection);
   const pieces = (aiAnalysis?.recommendedPieces ?? []).map((p) => p.toLowerCase());
@@ -578,7 +565,7 @@ function buildOutfitFormula(
   }
 
   if (eventType === "vacation") return "An easy base with a practical layer and comfortable shoes.";
-  if (vibeType === "minimal") return "A clean base with a simple layer and quiet finish.";
+  if (fitPreference === "clean") return "A clean base with a simple layer and quiet finish.";
   return "A clean base with a relaxed layer and light shoes.";
 }
 
@@ -694,7 +681,7 @@ function OutfitFlow() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadConfirmed, setUploadConfirmed] = useState(false);
   const [eventType, setEventType] = useState<EventType | null>(null);
-  const [vibeType, setVibeType] = useState<VibeType | null>(null);
+  const [fitPreference, setFitPreference] = useState<FitPreference | null>(null);
   const [budget, setBudget] = useState<Budget | null>(null);
   const [analyzingMessageIndex, setAnalyzingMessageIndex] = useState(0);
   const [sampleSelectionSource, setSampleSelectionSource] = useState<
@@ -716,7 +703,7 @@ function OutfitFlow() {
         uploadedItemType: aiAnalysis?.itemType,
         uploadedItemColor: aiAnalysis?.mainColor,
         occasion: eventType ?? undefined,
-        vibe: vibeType ?? undefined,
+        fitPreference: fitPreference ?? undefined,
       })
     : [];
 
@@ -727,7 +714,7 @@ function OutfitFlow() {
         ? OUTFITS[budget]
         : null;
   const showResult = Boolean(
-    uploadConfirmed && uploadedImage && eventType && vibeType && budget && outfit
+    uploadConfirmed && uploadedImage && eventType && fitPreference && budget && outfit
   );
 
   useEffect(() => {
@@ -739,7 +726,7 @@ function OutfitFlow() {
   async function analyzeUploadedItem(
     file: File,
     selectedEventType: EventType | null,
-    selectedVibeType: VibeType | null
+    selectedFitPreference: FitPreference | null
   ) {
     const analyzeStart = Date.now();
     analyzeStartRef.current = analyzeStart;
@@ -748,7 +735,7 @@ function OutfitFlow() {
     const formData = new FormData();
     formData.append("image", file);
     formData.append("eventType", selectedEventType ?? "casual-day");
-    formData.append("vibeType", selectedVibeType ?? "minimal");
+    formData.append("fitPreferenceType", selectedFitPreference ?? "relaxed");
 
     const apiRequestStart = Date.now();
     const res = await fetch("/api/analyze-item", {
@@ -786,7 +773,7 @@ function OutfitFlow() {
     setUploadConfirmed(false);
     setAiAnalysis(null);
     setEventType(null);
-    setVibeType(null);
+    setFitPreference(null);
     setBudget(null);
     setSampleSelectionSource(null);
     trySampleClickedRef.current = false;
@@ -806,7 +793,7 @@ function OutfitFlow() {
     setIsSampleItem(true);
     setUploadConfirmed(false);
     setEventType(null);
-    setVibeType(null);
+    setFitPreference(null);
     setBudget(null);
     setSampleSelectionSource(selectionSource);
     trySampleClickedRef.current = false;
@@ -835,7 +822,7 @@ function OutfitFlow() {
       uploadedImage !== null ||
       uploadConfirmed ||
       eventType ||
-      vibeType ||
+      fitPreference ||
       budget
     ) {
       router.replace("/outfit", { scroll: false });
@@ -851,7 +838,7 @@ function OutfitFlow() {
     searchParams,
     uploadConfirmed,
     uploadedImage,
-    vibeType,
+    fitPreference,
   ]);
 
   async function handleBudgetSelect(nextBudget: Budget) {
@@ -861,7 +848,7 @@ function OutfitFlow() {
     devLog(`budget selected (${nextBudget})`);
 
     if (isSampleItem) {
-      setAiAnalysis(getSampleAnalysis(eventType, vibeType, nextBudget));
+      setAiAnalysis(getSampleAnalysis(eventType, fitPreference, nextBudget));
       setBudget(nextBudget);
       devLog("result state set (sample path)", Date.now() - budgetSelectedAt);
       return;
@@ -875,7 +862,7 @@ function OutfitFlow() {
 
     setIsAnalyzing(true);
     try {
-      await analyzeUploadedItem(uploadedFile, eventType, vibeType);
+      await analyzeUploadedItem(uploadedFile, eventType, fitPreference);
       setBudget(nextBudget);
     } catch (err) {
       console.error(err);
@@ -894,7 +881,7 @@ function OutfitFlow() {
     setIsAnalyzing(false);
     setUploadConfirmed(false);
     setEventType(null);
-    setVibeType(null);
+    setFitPreference(null);
     setBudget(null);
     setAiAnalysis(null);
     setSampleSelectionSource(null);
@@ -907,7 +894,7 @@ function OutfitFlow() {
       ? 1
       : !eventType
         ? 2
-        : !vibeType
+        : !fitPreference
           ? 3
           : !budget
             ? 4
@@ -917,15 +904,15 @@ function OutfitFlow() {
     () => ({
       upload: uploadedImage ? "Item uploaded" : null,
       event: eventType ? EVENT_LABELS[eventType] : null,
-      vibe: vibeType ? VIBE_LABELS[vibeType] : null,
+      fit: fitPreference ? FIT_LABELS[fitPreference] : null,
       budget: budget ? BUDGET_LABELS[budget] : null,
     }),
-    [budget, eventType, uploadedImage, vibeType]
+    [budget, eventType, uploadedImage, fitPreference]
   );
 
   const resultNote = budget ? buildResultNote(budget) : null;
-  const outfitFormula = buildOutfitFormula(aiAnalysis, eventType, vibeType);
-  const allowedBudgets = getAllowedBudgets(vibeType);
+  const outfitFormula = buildOutfitFormula(aiAnalysis, eventType, fitPreference);
+  const allowedBudgets = getAllowedBudgets(fitPreference);
   const selectedCategories = (outfit?.items ?? []).map(
     (item, i) => item.category ?? aiRecommendedItems[i]
   );
@@ -933,7 +920,7 @@ function OutfitFlow() {
     uploadedItemType: aiAnalysis?.itemType,
     uploadedItemColor: aiAnalysis?.mainColor,
     occasion: eventType ?? undefined,
-    vibe: vibeType ?? undefined,
+    fitPreference: fitPreference ?? undefined,
     budget: budget ?? undefined,
     selectedCategories,
     aiReason: aiAnalysis?.reason,
@@ -942,7 +929,7 @@ function OutfitFlow() {
     uploadedItemType: aiAnalysis?.itemType,
     uploadedItemColor: aiAnalysis?.mainColor,
     occasion: eventType ?? undefined,
-    vibe: vibeType ?? undefined,
+    fitPreference: fitPreference ?? undefined,
     budget: budget ?? undefined,
     selectedCategories,
   });
@@ -950,7 +937,7 @@ function OutfitFlow() {
     uploadedItemType: aiAnalysis?.itemType,
     uploadedItemColor: aiAnalysis?.mainColor,
     occasion: eventType ?? undefined,
-    vibe: vibeType ?? undefined,
+    fitPreference: fitPreference ?? undefined,
     budget: budget ?? undefined,
     selectedCategories,
   });
@@ -990,7 +977,7 @@ function OutfitFlow() {
   }, [showResult]);
 
   useEffect(() => {
-    if (!showResult || !outfit || !eventType || !vibeType || !budget) {
+    if (!showResult || !outfit || !eventType || !fitPreference || !budget) {
       hasTrackedResultRef.current = false;
       return;
     }
@@ -999,13 +986,13 @@ function OutfitFlow() {
 
     track("result_generated", {
       occasion: eventType,
-      vibe: vibeType,
+      fitPreference,
       budget,
       uploadedItemType: aiAnalysis?.itemType ?? "unknown",
       productCount: outfit.items.length,
     });
     hasTrackedResultRef.current = true;
-  }, [aiAnalysis?.itemType, budget, eventType, outfit, showResult, vibeType]);
+  }, [aiAnalysis?.itemType, budget, eventType, outfit, showResult, fitPreference]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(to_bottom,#0a0a0c,#111113_40%,#0a0a0c)] text-white">
@@ -1043,12 +1030,12 @@ function OutfitFlow() {
         {(selectedSummary.budget ||
           selectedSummary.upload ||
           selectedSummary.event ||
-          selectedSummary.vibe) &&
+          selectedSummary.fit) &&
           !showResult && (
             <div className="mb-5 flex flex-wrap gap-2">
               {selectedSummary.upload && <MiniPill>{selectedSummary.upload}</MiniPill>}
               {selectedSummary.event && <MiniPill>{selectedSummary.event}</MiniPill>}
-              {selectedSummary.vibe && <MiniPill>{selectedSummary.vibe}</MiniPill>}
+              {selectedSummary.fit && <MiniPill>{selectedSummary.fit}</MiniPill>}
               {selectedSummary.budget && <MiniPill>{selectedSummary.budget}</MiniPill>}
             </div>
           )}
@@ -1105,7 +1092,7 @@ function OutfitFlow() {
                 Black trousers → white tee + overshirt + white sneakers
               </p>
               <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-                Choose an event and vibe to make the result more specific.
+                Choose an event and fit to make the result more specific.
               </p>
             </div>
           </section>
@@ -1217,23 +1204,23 @@ function OutfitFlow() {
           </section>
         )}
 
-        {uploadConfirmed && eventType && !vibeType && (
+        {uploadConfirmed && eventType && !fitPreference && (
           <section className="space-y-3">
             <div className="mb-5 flex items-start gap-4">
               <BackButton onClick={() => setEventType(null)} />
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">What vibe do you want?</h2>
+                <h2 className="text-2xl font-semibold tracking-tight">Choose the fit</h2>
                 <p className="mt-0.5 text-sm text-zinc-500">
-                  This guides the taste of the outfit.
+                  Pick the silhouette so the outfit matches how you actually like clothes to fit.
                 </p>
                 <p className="mt-1 text-sm text-zinc-500">Step 3 of 4</p>
               </div>
             </div>
 
-            {VIBE_OPTIONS.map((opt) => (
+            {FIT_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setVibeType(opt.value)}
+                onClick={() => setFitPreference(opt.value)}
                 className={`group w-full rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-5 py-4 text-left transition duration-200 hover:scale-[1.025] active:scale-[0.99] ${opt.accent}`}
               >
                 <div className="flex items-center justify-between gap-4">
@@ -1256,10 +1243,10 @@ function OutfitFlow() {
           </section>
         )}
 
-        {uploadConfirmed && eventType && vibeType && !budget && (
+        {uploadConfirmed && eventType && fitPreference && !budget && (
           <section className="space-y-3">
             <div className="mb-5 flex items-start gap-4">
-              <BackButton onClick={() => setVibeType(null)} />
+              <BackButton onClick={() => setFitPreference(null)} />
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight">Pick budget.</h2>
                 <p className="mt-0.5 text-sm text-zinc-500">Step 4 of 4</p>
@@ -1275,26 +1262,10 @@ function OutfitFlow() {
                   Building your outfit...
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-                  Analyzing your item, occasion, vibe, and budget.
+                  Analyzing your item, occasion, fit, and budget.
                 </p>
                 <p className="mt-2 text-xs leading-relaxed text-zinc-500">
                   {ANALYZING_MESSAGES[analyzingMessageIndex]}
-                </p>
-              </div>
-            )}
-
-            {vibeType === "expensive-looking" && (
-              <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                <p className="text-xs leading-relaxed text-zinc-500">
-                  Expensive-looking outfits work best with mid-range or premium pieces.
-                </p>
-              </div>
-            )}
-
-            {vibeType === "bold" && (
-              <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                <p className="text-xs leading-relaxed text-zinc-500">
-                  Bold outfits usually need stronger pieces, so mid-range or premium works best.
                 </p>
               </div>
             )}
@@ -1326,7 +1297,7 @@ function OutfitFlow() {
           </section>
         )}
 
-        {showResult && outfit && budget && uploadedImage && eventType && vibeType && (
+        {showResult && outfit && budget && uploadedImage && eventType && fitPreference && (
           <section className="pt-2">
             <div className="mb-6 flex items-center justify-between gap-3">
               <BackButton onClick={() => setBudget(null)} />
@@ -1357,7 +1328,7 @@ function OutfitFlow() {
                     {resolveOutfitResultTitle(
                       aiAnalysis?.outfitDirection,
                       eventType,
-                      vibeType,
+                      fitPreference,
                       budget,
                       aiAnalysis?.itemType
                     ) ?? outfit.title}
@@ -1371,7 +1342,7 @@ function OutfitFlow() {
                   Selections
                 </p>
                 <MiniPill>{EVENT_LABELS[eventType]}</MiniPill>
-                <MiniPill>{VIBE_LABELS[vibeType]}</MiniPill>
+                <MiniPill>{FIT_LABELS[fitPreference]}</MiniPill>
                 <MiniPill>{BUDGET_LABELS[budget]}</MiniPill>
               </div>
 
@@ -1412,7 +1383,7 @@ function OutfitFlow() {
                   <p className="text-[11px] text-zinc-600">{outfit.items.length} items</p>
                   </div>
                   <p className="mb-5 text-xs leading-relaxed text-zinc-500">
-                    Styled for your occasion, vibe, and budget — picked to work in real life, not just on a moodboard.
+                    Styled for your occasion, fit, and budget — picked to work in real life, not just on a moodboard.
                   </p>
                 </div>
 
@@ -1459,7 +1430,7 @@ function OutfitFlow() {
                                 uploadedItemType: aiAnalysis?.itemType,
                                 uploadedItemColor: aiAnalysis?.mainColor,
                                 occasion: eventType,
-                                vibe: vibeType,
+                                fitPreference,
                                 budget,
                                 selectedCategories,
                                 productNote: item.note,
@@ -1478,7 +1449,7 @@ function OutfitFlow() {
                                 brand: item.brand ?? "unknown",
                                 category: item.category ?? aiRecommendedItems[i] ?? "unknown",
                                 occasion: eventType,
-                                vibe: vibeType,
+                                fitPreference,
                                 budget,
                               })
                             }

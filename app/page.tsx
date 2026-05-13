@@ -34,7 +34,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-base leading-relaxed text-zinc-400 mb-6 max-w-sm">
-          Have a piece you need to wear this week? Upload it, choose the situation, and get a styled outfit built around it.
+          Have a piece you need to wear this week? Upload it, choose where you&apos;re wearing it, how you like the fit, and your budget — then get a styled outfit built around it.
         </p>
 
         <p className="text-sm text-zinc-500 mb-3 max-w-xs">
@@ -60,7 +60,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {["Upload photo", "Pick occasion", "Choose vibe", "Shop matches"].map((pill) => (
+          {["Upload photo", "Pick occasion", "Choose fit", "Shop matches"].map((pill) => (
             <span
               key={pill}
               className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-zinc-400"
@@ -103,8 +103,8 @@ export default function LandingPage() {
             },
             {
               step: "03",
-              title: "Choose the vibe",
-              desc: "Safe, minimal, bold, or expensive-looking.",
+              title: "Choose the fit",
+              desc: "Clean, relaxed, or baggy.",
             },
             {
               step: "04",
