@@ -20,6 +20,22 @@ export type ProductCategory =
 export type Budget = "affordable" | "mid" | "premium";
 export type BudgetTier = Budget;
 export type FitPreference = "clean" | "relaxed" | "baggy";
+
+export const FIT_PREFERENCES = ["clean", "relaxed", "baggy"] as const satisfies readonly FitPreference[];
+
+export function isFitPreference(value: unknown): value is FitPreference {
+  if (typeof value !== "string") return false;
+  const v = value.trim().toLowerCase();
+  return v === "clean" || v === "relaxed" || v === "baggy";
+}
+
+export function normalizeFitPreference(value: unknown): FitPreference {
+  if (typeof value !== "string") return "relaxed";
+  const v = value.trim().toLowerCase();
+  if (v === "clean" || v === "relaxed" || v === "baggy") return v;
+  return "relaxed";
+}
+
 export type ProductSource = "manual" | "feed" | "api" | "scrape";
 export type ProductRole = "top" | "bottom" | "shoes" | "layer" | "outerwear" | "accessory";
 
@@ -1304,7 +1320,7 @@ export type OutfitRecommendationContext = {
   uploadedItemType?: string;
   uploadedItemColor?: string;
   occasion?: string;
-  fitPreference?: string;
+  fitPreference?: FitPreference;
 };
 
 function normalizeCtx(s?: string): string {
@@ -1350,12 +1366,11 @@ function isLightBeigeChino(product: Product): boolean {
   );
 }
 
-function allowsWarmWeatherLightBottoms(occasion?: string, fitPreference?: string): boolean {
+function allowsWarmWeatherLightBottoms(occasion?: string, fitPreference?: FitPreference): boolean {
   const o = normalizeCtx(occasion);
-  const f = normalizeCtx(fitPreference);
   if (o === "vacation") return true;
   if (o === "casual-day") return true;
-  if (o === "dinner" && f === "clean") return true;
+  if (o === "dinner" && fitPreference === "clean") return true;
   return false;
 }
 

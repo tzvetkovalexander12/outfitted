@@ -1,8 +1,10 @@
+import type { FitPreference } from "./products";
+
 export type StylingContext = {
   uploadedItemType?: string;
   uploadedItemColor?: string;
   occasion?: string;
-  fitPreference?: string;
+  fitPreference?: FitPreference;
   budget?: string;
   selectedCategories?: string[];
   aiReason?: string;

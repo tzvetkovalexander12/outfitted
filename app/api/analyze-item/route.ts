@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { normalizeFitPreference } from "@/lib/products";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -45,10 +46,7 @@ export async function POST(req: Request) {
       typeof rawEventType === "string" && rawEventType.trim().length > 0
         ? rawEventType.trim()
         : "casual-day";
-    const fitPreferenceType =
-      typeof rawFitPreference === "string" && rawFitPreference.trim().length > 0
-        ? rawFitPreference.trim()
-        : "relaxed";
+    const fitPreferenceType = normalizeFitPreference(rawFitPreference);
 
     if (!image || !(image instanceof File)) {
       return NextResponse.json({ error: "No image" }, { status: 400 });
